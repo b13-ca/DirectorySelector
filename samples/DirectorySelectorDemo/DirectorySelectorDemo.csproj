@@ -8,4 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="b13.DirectorySelector" Version="2026.3.17.23850" />
+  </ItemGroup>
+
 </Project>
