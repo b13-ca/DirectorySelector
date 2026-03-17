@@ -22,9 +22,9 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 ## Credits
 
 - This program contains only original work from [b13](https://github.com/b13-ca/).
-- Some code snippets from the internet probably inspired me!
+- Some code snippets from the internet probably inspired us!
 - Images are derivative works based on royalty-free files.
-- The AI was dumb enough to try to help me.
+- The AI was dumb enough to try to help our team.
 
 
 ## Links
