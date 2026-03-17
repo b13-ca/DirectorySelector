@@ -10,7 +10,7 @@ C# Windows form app DirectorySelector component
 
 This project is open source, it can be shared with certain restrictions and limitations.  
 licensed under the [BSD 3-Clause License](https://opensource.org/license/bsd-3-clause/).  
-Please see the [LICENSE file](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/LICENSE) for more information.
+Please see the [LICENSE](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/LICENSE) for more information.
 
 
 ## Owner International Id
