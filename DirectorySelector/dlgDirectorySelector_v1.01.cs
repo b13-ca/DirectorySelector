@@ -25,6 +25,8 @@ namespace PrototypeOmega;
 #pragma warning restore IDE0130
 #endregion PrototypeOmega namespace
 
+//https://www.softpost.org/dotnet/csproj-file-explained-propetygroups-targetframework-itemgroup
+//<GenerateDocumentationFile>true</GenerateDocumentationFile>
 //[ToolboxItemFilter("PrototypeOmega", ToolboxItemFilterType.Allow)]
 //[Guid("9A2B1C3D-4E5F-6A7B-8C9E-0E1F2A3B4C5E")]
 [ToolboxItem(true)]
