@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Exclure PrototypeOmega files
+basedOn/
+*.lnk
+*.cmd
+*.bat
+*.nupkg
+
 # User-specific files
 *.rsuser
 *.suo
