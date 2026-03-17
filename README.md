@@ -1,7 +1,4 @@
-<img src="https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/DirectorySelector/images/cSharp.png" align="right" />
-
-
-# DirectorySelector
+# DirectorySelector ![Logo](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/DirectorySelector/images/cSharp.png)
 C# Windows form app DirectorySelector component
 
 **Visual**
