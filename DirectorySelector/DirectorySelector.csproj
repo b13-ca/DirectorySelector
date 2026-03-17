@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+    <Authors>Patrice CHARBONNEAU (Sigma3Wolf)</Authors>
+    <Company>https://b13.ca/</Company>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <UtcYear>$([System.DateTime]::UtcNow.Year)</UtcYear>
+    <UtcMonth>$([System.DateTime]::UtcNow.Month)</UtcMonth>
+    <UtcDay>$([System.DateTime]::UtcNow.Day)</UtcDay>
+    <MinutesSinceMonthStart>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::new($(UtcYear), $(UtcMonth), 1))).TotalMinutes.ToString("0"))</MinutesSinceMonthStart>
+    <Version>$(UtcYear).$(UtcMonth).$(UtcDay).$(MinutesSinceMonthStart)</Version>
+    <AssemblyName>b13.DirectorySelector</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <RootNamespace>b13</RootNamespace>
+    <Description>High-performance c# WinForms components for directory navigation. Part of the b13 ecosystem.</Description>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <PackageId>b13.DirectorySelector</PackageId>
+    <PackageProjectUrl>https://b13.ca/</PackageProjectUrl>
+    <PackageTags>b13 dotnet csharp WinForms Components Dialogs</PackageTags>
+    <PackageIcon>images/b13.png</PackageIcon>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/Sigma3Wolf/DirectorySelector/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="images\cSharp.png" Pack="true" PackagePath="images\" />
+    <None Include="images\visual.png" Pack="true" PackagePath="images\" />
+    <EmbeddedResource Include="images\b13.png" Pack="true" PackagePath="images\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="images\icon16.png">
+      <LogicalName>b13.DirectorySelector.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  
+  <Target Name="DisplayVersion" AfterTargets="PrepareForBuild">
+    <Message Importance="high" Text="--- [b13 Build] ---" />
+    <Message Importance="high" Text="Version: $(Version)" />
+    <Message Importance="high" Text="AssemblyVersion: $(AssemblyVersion)" />
+    <Message Importance="high" Text="------------------------------" />
+  </Target>
+</Project>
