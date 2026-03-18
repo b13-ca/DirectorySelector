@@ -22,6 +22,8 @@ public partial class Form1 : Form {
 
             if (objDialog.ShowDialog() == DialogResult.OK) {
                 System.Diagnostics.Debug.WriteLine("User confirmed the dialog.");
+
+                //** THIS IS WHERE YOU GET BACK USER SELECTION **//
                 this._lstDirectory = objDialog.UserSelection;
                 System.Diagnostics.Debug.WriteLine(this._lstDirectory.Count);
             }
