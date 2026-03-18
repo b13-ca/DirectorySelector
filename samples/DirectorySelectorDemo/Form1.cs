@@ -2,10 +2,6 @@ using PrototypeOmega;
 
 namespace DirectorySelectorDemo;
 
-// 2026-03-16: ce qui reste a faire
-// ?? pretty much completed !!  let's make a backup !!
-// publish NuGet to the world ?
-
 public partial class Form1 : Form {
     private List<string> _lstDirectory = [];
 
