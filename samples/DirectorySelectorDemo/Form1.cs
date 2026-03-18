@@ -7,10 +7,11 @@ public partial class Form1 : Form {
 
     public Form1() {
         InitializeComponent();
-        this._lstDirectory.Add(@"C:\");
-        this._lstDirectory.Add(@"E:\");
-
         this.cmdOpenDialog.Click += this.CmdOpenDialog_Click;
+
+        //** Here you can add default checked value **//
+        this._lstDirectory.Add(@"C:\");
+        //this._lstDirectory.Add(@"E:\");
     }
 
     private void CmdOpenDialog_Click(object? sender, EventArgs e) {
@@ -18,14 +19,17 @@ public partial class Form1 : Form {
             objDialog.Title = "Select a directory... or more...";
             objDialog.Size = new System.Drawing.Size(500, 500);
             objDialog.MinimumSize = objDialog.Size;
+
+            //** Here you tell the component to select the predefined value **//
             objDialog.UserSelection = this._lstDirectory;
 
+            //** You show the dialog to the user **//
             if (objDialog.ShowDialog() == DialogResult.OK) {
-                System.Diagnostics.Debug.WriteLine("User confirmed the dialog.");
+                //** if user press ok, you can get back his selection **//
 
                 //** THIS IS WHERE YOU GET BACK USER SELECTION **//
                 this._lstDirectory = objDialog.UserSelection;
-                System.Diagnostics.Debug.WriteLine(this._lstDirectory.Count);
+                //System.Diagnostics.Debug.WriteLine(this._lstDirectory.Count);
             }
         }
     }
