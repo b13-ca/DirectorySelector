@@ -32,7 +32,7 @@
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageId>b13.DirectorySelector</PackageId>
     <PackageProjectUrl>https://b13.ca/</PackageProjectUrl>
-    <PackageTags>b13 dotnet csharp WinForms Components Dialogs</PackageTags>
+    <PackageTags>b13 PrototypeOmega dotnet csharp WinForms Components Dialogs</PackageTags>
 	
 	<PackageIconUrl></PackageIconUrl>
     <PackageIcon>images/b13.png</PackageIcon>
