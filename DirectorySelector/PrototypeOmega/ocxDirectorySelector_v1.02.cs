@@ -37,11 +37,11 @@ public class CustomTreeNode(string pstrKey, string pstrText) {
     public bool HasChild { get; set; } = false;
 }
 
-
 [ToolboxItem(false)]
 [Description("A custom treeview for directory browsing")]
 //[DefaultEvent("NodeChecked")] //plus tard...
 public class DirTreeViewOcx : UserControl {
+    #region local variables
     private readonly InternalTreeView _tree;
     private readonly Panel _topPanelLabel;
     private readonly Label _topLabel;
@@ -49,28 +49,14 @@ public class DirTreeViewOcx : UserControl {
     private readonly Button _cmdButtonCancel;
     private readonly Button _cmdButtonSelect;
 
+    private TreeNode? _LastNodeSelect = null;
     private List<string> _lstDirectory = [];
     private Size _MinimumSize = new Size(350, 400);
     private readonly Form _Parent;
     private const int _SpacerX = 5;
 
     private readonly Dictionary<string, CustomTreeNode> _NodeData = [];
-
-    #region MinSize section
-    private const int WM_WINDOWPOSCHANGING = 0x0046;
-    private const int SWP_NOSIZE = 0x0001;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct WINDOWPOS {
-        public IntPtr hwnd;
-        public IntPtr hwndInsertAfter;
-        public int x;
-        public int y;
-        public int cx;
-        public int cy;
-        public int flags;
-    }
-    #endregion MinSize section
+    #endregion local variables
 
     #region InternalTreeView
     private class InternalTreeView : TreeView {
@@ -115,7 +101,7 @@ public class DirTreeViewOcx : UserControl {
     #endregion InternalTreeView
 
     #region Constructor
-    private Dictionary<string, string> _dicUserSelection = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _dicUserSelection = new(StringComparer.OrdinalIgnoreCase);
     public DirTreeViewOcx(Form pobjParent, List<string> plstUserSelection) {
         // InitializeComponent()
         this._tree = new();
@@ -197,7 +183,7 @@ public class DirTreeViewOcx : UserControl {
         this._cmdButtonCancel.MouseEnter += this.Button_MouseEnter;
         this._cmdButtonCancel.Click += this.CmdButton_Click;
 
-        this.FixButtons();
+        FixButtons();
 
         this.BuildDefaultDictionary(plstUserSelection);
     }
@@ -216,7 +202,59 @@ public class DirTreeViewOcx : UserControl {
         }
         base.Dispose(disposing);
     }
+    #endregion Constructor
 
+    #region Public Function/Properties Get; Set;
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool MultiSelect { get; set; } = true;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Color ColorSquare { get; set; } = Color.Navy;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Color ColorPlus { get; set; } = Color.DarkRed;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Color ColorDot { get; set; } = Color.Purple;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public int PenWidth { get; set; } = 2;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool ShowExtendedLabel { get; set; } = true;
+
+    public static List<TreeNode> GetAllChildNodes(TreeNode pobjParent) {
+        List<TreeNode> lstRet = [];
+
+        if (pobjParent != null) {
+            // Initialisation JIT de la pile de travail
+            Stack<TreeNode> stackNodes = new Stack<TreeNode>();
+
+            // On prépare la pile avec les enfants du parent fourni
+            foreach (TreeNode objChild in pobjParent.Nodes) {
+                stackNodes.Push(objChild);
+            }
+
+            while (stackNodes.Count > 0) {
+                TreeNode objCurrent = stackNodes.Pop();
+                lstRet.Add(objCurrent);
+
+                // On ajoute les enfants du noeud actuel à la pile pour traitement futur
+                foreach (TreeNode objSubChild in objCurrent.Nodes) {
+                    stackNodes.Push(objSubChild);
+                }
+            }
+        }
+
+        return lstRet;
+    }
+
+    public List<string> GetUserSelection() {
+        return [.. this._lstDirectory];
+    }
+    #endregion Public Function/Properties Get; Set;
+
+    #region Private section
     private void BuildDefaultDictionary(List<string> plstUserSelection) {
         foreach (string strItem in plstUserSelection) {
             this._dicUserSelection[strItem] = "";
@@ -235,11 +273,7 @@ public class DirTreeViewOcx : UserControl {
         }
     }
 
-    public List<string> GetUserSelection() {
-        return [.. this._lstDirectory];
-    }
-
-    public List<string> GetCheckedNodePathsIterative() {
+    private List<string> GetCheckedNodePathsIterative() {
         // Variable de retour : Initialisée systématiquement
         List<string> lstRet = [];
 
@@ -275,7 +309,7 @@ public class DirTreeViewOcx : UserControl {
         return lstRet;
     }
 
-    private void FixButtons() {
+    private static void FixButtons() {
         //Fix Button based on Font
         //Size szText = GetStringSize("Cancel", this.Font);
 
@@ -307,29 +341,12 @@ public class DirTreeViewOcx : UserControl {
             objButton.Left = objButton.Left - 1;
         }
     }
-    #endregion Constructor
-
-    #region Properties
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Color ColorSquare { get; set; } = Color.Navy;
-
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Color ColorPlus { get; set; } = Color.DarkRed;
-
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Color ColorDot { get; set; } = Color.Purple;
-
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public int PenWidth { get; set; } = 2;
-
-    public TreeNodeCollection Nodes {
+    
+    private TreeNodeCollection Nodes {
         get {
             return this._tree.Nodes;
         }
     }
-
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool ShowExtendedLabel { get; set; } = true;
 
     private int _TopLabelMaxChar = 0;
     private int TopLabelMaxChar {
@@ -419,9 +436,110 @@ public class DirTreeViewOcx : UserControl {
     }
 
     private int BoxHeight { get; set; } = 0;
-    #endregion Properties
+
+    private int GetMaxCharTopLabel(int plngCurrentWidth) {
+        int lngRet = 256;
+
+        if (plngCurrentWidth > 0) {
+            int intMaxAvailableWidth = plngCurrentWidth;
+            Span<char> spnBuffer = stackalloc char[lngRet];
+            spnBuffer.Fill('W');
+            ReadOnlySpan<char> spnText = spnBuffer;
+
+            while (spnText.Length > 0) {
+                // Use GDI to measure current span
+                Size szText = GetStringSize(spnText.ToString(), this._topLabel.Font);
+                if (szText.Width <= intMaxAvailableWidth) {
+                    // We found the length that fits
+                    lngRet = spnText.ToString().Length;
+                    break;
+                }
+
+                // Reduce the length by 1 from the right for the next iteration
+                spnText = spnText.Slice(0, spnText.Length - 1);
+            }
+        }
+
+        return lngRet;
+    }
+
+    private static Size GetStringSize(string pstrText, Font pobjFont) {
+        // Initialisation JIT de la variable de retour avec une valeur par défaut
+        Size szRet = Size.Empty;
+
+        if (!string.IsNullOrEmpty(pstrText) && pobjFont != null) {
+            // Mesure GDI (plus précise pour le rendu WinForms standard)
+            szRet = TextRenderer.MeasureText(pstrText, pobjFont);
+        }
+
+        return szRet;
+    }
+
+    private int PopulateTreeView(List<string>? plstRootNodes) {
+        int lngRet = 0;
+
+        List<string>? lstNodes = plstRootNodes;
+        if (lstNodes == null) {
+            //By default the TreeView contain all Physical Drive
+            lstNodes = StructDirectoryEx.GetPhysicalDrives();
+        }
+
+        if (lstNodes.Count > 0) {
+            try {
+                this._tree.BeginUpdate();
+                this._NodeData.Clear();
+                this._tree.Nodes.Clear();
+
+                foreach (string strEntry in lstNodes) {
+                    CustomTreeNode objData = new CustomTreeNode(strEntry, strEntry);
+                    this.AddNode(objData); //second argument is not mandatory here for root object
+                    lngRet++;
+                }
+
+                TreeNode objFirst = this._tree.Nodes[0];
+                this._tree.SelectedNode = objFirst;
+                objFirst.EnsureVisible();
+                //} catch (Exception ex) {
+                //System.Diagnostics.Debug.WriteLine($"Erreur init drives : {ex.Message}");
+            } finally {
+                this._tree.EndUpdate();
+            }
+        }
+
+        return lngRet;
+    }
+
+    private static int GetExpandButtonPosX(TreeNode pobjNode) {
+        int lngRet = pobjNode.Bounds.Left - 16;
+
+        return lngRet;
+    }
+
+    private int GetCheckboxButtonPosX(int plngPlusRectX) {
+        int lngRet = plngPlusRectX + this.BoxHeight + _SpacerX;
+
+        return lngRet;
+    }
+    #endregion Private section
 
     #region Override
+
+    #region MinSize override section
+    private const int WM_WINDOWPOSCHANGING = 0x0046;
+    private const int SWP_NOSIZE = 0x0001;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WINDOWPOS {
+        public IntPtr hwnd;
+        public IntPtr hwndInsertAfter;
+        public int x;
+        public int y;
+        public int cx;
+        public int cy;
+        public int flags;
+    }
+    #endregion MinSize override section
+
     protected override void WndProc(ref Message m) {
         if (m.Msg == WM_WINDOWPOSCHANGING) {
             // this enforce Minsize of 350x400 in IDE
@@ -481,92 +599,47 @@ public class DirTreeViewOcx : UserControl {
             }
         }
     }
+
+    protected override void OnHandleCreated(EventArgs e) {
+        base.OnHandleCreated(e);
+
+        // Cette vérification est 100% fiable à ce stade
+        //if (this.DesignMode == false) {
+        //    //this.PopulateTreeView(null);
+        //    //System.Diagnostics.Debug.WriteLine("Runtime : Arbre peuplé.");
+        //}
+
+        //we want it anyway... but now we know how to avoid doing stuff in design mode ... ;)
+        this.PopulateTreeView(null);
+        //System.Diagnostics.Debug.WriteLine("Runtime : Arbre peuplé.");
+    }
     #endregion Override
 
-    private int GetMaxCharTopLabel(int plngCurrentWidth) {
-        int lngRet = 256;
+    //private void panel1_Paint(object sender, PaintEventArgs e) {
+    //    //https://stackoverflow.com/questions/8283631/graphics-drawstring-vs-textrenderer-drawtextwhich-can-deliver-better-quality
+    //    //NOTE: Use GDI (.net compatible) and NOT GDI+ (leaking in .net)
+    //    //GDI   : TextRenderer.MeasureText, TextRenderer.DrawText
+    //    //GDI+  : graphics.MeasureString, graphics.DrawString
+    //    //use   : Application.SetCompatibleTextRenderingDefault(false);
 
-        if (plngCurrentWidth > 0) {
-            int intMaxAvailableWidth = plngCurrentWidth;
-            Span<char> spnBuffer = stackalloc char[lngRet];
-            spnBuffer.Fill('W');
-            ReadOnlySpan<char> spnText = spnBuffer;
+    //    //GDI (i.e. TextRenderer)
+    //    String s = "The quick brown fox jumped over the lazy dog";
+    //    Point origin = new Point(11, 11);
+    //    Font font = this.Font;
 
-            while (spnText.Length > 0) {
-                // Use GDI to measure current span
-                Size szText = GetStringSize(spnText.ToString(), this._topLabel.Font);
-                if (szText.Width <= intMaxAvailableWidth) {
-                    // We found the length that fits
-                    lngRet = spnText.ToString().Length;
-                    break;
-                }
+    //    e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
 
-                // Reduce the length by 1 from the right for the next iteration
-                spnText = spnText.Slice(0, spnText.Length - 1);
-            }
-        }
+    //    TextRenderer.DrawText(e.Graphics, s, font, origin, SystemColors.InfoText);
+    //}
 
-        return lngRet;
-    }
+    //private static int GetCheckboxPosition(int plngStartPos, int plngBoxSize) {
+    //    int lngRet = plngStartPos;
+    //    lngRet = lngRet + _CheckboxAlign + plngBoxSize;
 
-    private static Size GetStringSize(string pstrText, Font pobjFont) {
-        // Initialisation JIT de la variable de retour avec une valeur par défaut
-        Size szRet = Size.Empty;
+    //    return lngRet;
+    //}
 
-        if (!string.IsNullOrEmpty(pstrText) && pobjFont != null) {
-            // Mesure GDI (plus précise pour le rendu WinForms standard)
-            szRet = TextRenderer.MeasureText(pstrText, pobjFont);
-        }
-
-        return szRet;
-    }
-
-    public int PopulateTreeView(List<string>? plstRootNodes) {
-        int lngRet = 0;
-
-        List<string>? lstNodes = plstRootNodes;
-        if (lstNodes == null) {
-            //By default the TreeView contain all Physical Drive
-            lstNodes = StructDirectoryEx.GetPhysicalDrives();
-        }
-
-        if (lstNodes.Count > 0) {
-            try {
-                this._tree.BeginUpdate();
-                this._NodeData.Clear();
-                this._tree.Nodes.Clear();
-
-                foreach (string strEntry in lstNodes) {
-                    CustomTreeNode objData = new CustomTreeNode(strEntry, strEntry);
-                    this.AddNode(objData); //second argument is not mandatory here for root object
-                    lngRet++;
-                }
-
-                TreeNode objFirst = this._tree.Nodes[0];
-                this._tree.SelectedNode = objFirst;
-                objFirst.EnsureVisible();
-                //} catch (Exception ex) {
-                //System.Diagnostics.Debug.WriteLine($"Erreur init drives : {ex.Message}");
-            } finally {
-                this._tree.EndUpdate();
-            }
-        }
-
-        return lngRet;
-    }
-
-    private static int GetExpandButtonPosX(TreeNode pobjNode) {
-        int lngRet = pobjNode.Bounds.Left - 16;
-
-        return lngRet;
-    }
-
-    private int GetCheckboxButtonPosX(int plngPlusRectX) {
-        int lngRet = plngPlusRectX + this.BoxHeight + _SpacerX;
-
-        return lngRet;
-    }
-
+    #region Private functions
     private void OnInternalDrawNode(DrawTreeNodeEventArgs e) {
         if (e != null && e.Node != null && !string.IsNullOrEmpty(e.Node.Name)) {
             TreeNode objNode = e.Node;
@@ -669,30 +742,6 @@ public class DirTreeViewOcx : UserControl {
         }
     }
 
-    //private void panel1_Paint(object sender, PaintEventArgs e) {
-    //    //https://stackoverflow.com/questions/8283631/graphics-drawstring-vs-textrenderer-drawtextwhich-can-deliver-better-quality
-    //    //NOTE: Use GDI (.net compatible) and NOT GDI+ (leaking in .net)
-    //    //GDI   : TextRenderer.MeasureText, TextRenderer.DrawText
-    //    //GDI+  : graphics.MeasureString, graphics.DrawString
-    //    //use   : Application.SetCompatibleTextRenderingDefault(false);
-
-    //    //GDI (i.e. TextRenderer)
-    //    String s = "The quick brown fox jumped over the lazy dog";
-    //    Point origin = new Point(11, 11);
-    //    Font font = this.Font;
-
-    //    e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
-
-    //    TextRenderer.DrawText(e.Graphics, s, font, origin, SystemColors.InfoText);
-    //}
-
-    //private static int GetCheckboxPosition(int plngStartPos, int plngBoxSize) {
-    //    int lngRet = plngStartPos;
-    //    lngRet = lngRet + _CheckboxAlign + plngBoxSize;
-
-    //    return lngRet;
-    //}
-
     private void ChangeParentState(List<TreeNode> pobjParents, TreeNode pobjNode) {
         bool blnState = pobjNode.Checked;
 
@@ -730,7 +779,7 @@ public class DirTreeViewOcx : UserControl {
         }
     }
 
-    public List<TreeNode> GetAllSiblingNodes(TreeNode pobjNode) {
+    private List<TreeNode> GetAllSiblingNodes(TreeNode pobjNode) {
         // Initialisation de la variable de retour (Liste courte [])
         List<TreeNode> lstRet = [];
 
@@ -750,7 +799,7 @@ public class DirTreeViewOcx : UserControl {
         return lstRet;
     }
 
-    public static List<TreeNode> GetAllParentNodes(TreeNode pobjChild) {
+    private static List<TreeNode> GetAllParentNodes(TreeNode pobjChild) {
         List<TreeNode> lstRet = [];
 
         if (pobjChild != null) {
@@ -762,32 +811,6 @@ public class DirTreeViewOcx : UserControl {
 
                 // Remontée au niveau supérieur
                 objCurrent = objCurrent.Parent;
-            }
-        }
-
-        return lstRet;
-    }
-
-    public static List<TreeNode> GetAllChildNodes(TreeNode pobjParent) {
-        List<TreeNode> lstRet = [];
-
-        if (pobjParent != null) {
-            // Initialisation JIT de la pile de travail
-            Stack<TreeNode> stackNodes = new Stack<TreeNode>();
-
-            // On prépare la pile avec les enfants du parent fourni
-            foreach (TreeNode objChild in pobjParent.Nodes) {
-                stackNodes.Push(objChild);
-            }
-
-            while (stackNodes.Count > 0) {
-                TreeNode objCurrent = stackNodes.Pop();
-                lstRet.Add(objCurrent);
-
-                // On ajoute les enfants du noeud actuel à la pile pour traitement futur
-                foreach (TreeNode objSubChild in objCurrent.Nodes) {
-                    stackNodes.Push(objSubChild);
-                }
             }
         }
 
@@ -831,14 +854,20 @@ public class DirTreeViewOcx : UserControl {
                     // Clic sur la CheckBox
                     objNode.Checked = !objNode.Checked;
 
-                    //Change all Child accordingly
-                    List<TreeNode> objChilds = GetAllChildNodes(objNode);
-                    foreach (TreeNode objChild in objChilds) {
-                        objChild.Checked = objNode.Checked;
+                    //Keeping value for SimpleSelect
+                    if (this.MultiSelect == false) {
+                        if (objNode.Checked) {
+                            if (this._LastNodeSelect != null) {
+                                this._LastNodeSelect.Checked = false;
+                                //this.ChangeCheckedValueChild(this._LastNodeSelect);
+                            }
+                            this._LastNodeSelect = objNode;
+                        } else {
+                            this._LastNodeSelect = null;
+                        }
                     }
-
-                    List<TreeNode> objParents = GetAllParentNodes(objNode);
-                    this.ChangeParentState(objParents, objNode);
+                    ChangeCheckedValueChild(objNode);
+                    this.ChangeCheckedValueParent(objNode);
 
                     this._tree.SelectedNode = objNode;
                     this.TopLabelText = objNode.Name;
@@ -858,21 +887,20 @@ public class DirTreeViewOcx : UserControl {
         base.OnMouseDown(e);
     }
 
-    protected override void OnHandleCreated(EventArgs e) {
-        base.OnHandleCreated(e);
-
-        // Cette vérification est 100% fiable à ce stade
-        //if (this.DesignMode == false) {
-        //    //this.PopulateTreeView(null);
-        //    //System.Diagnostics.Debug.WriteLine("Runtime : Arbre peuplé.");
-        //}
-
-        //we want it anyway... but now we know how to avoid doing stuff in design mode ... ;)
-        this.PopulateTreeView(null);
-        //System.Diagnostics.Debug.WriteLine("Runtime : Arbre peuplé.");
+    private static void ChangeCheckedValueChild(TreeNode pobjNode) {
+        //Change all Child accordingly
+        List<TreeNode> objChilds = GetAllChildNodes(pobjNode);
+        foreach (TreeNode objChild in objChilds) {
+            objChild.Checked = pobjNode.Checked;
+        }
     }
 
-    public TreeNode? AddNode(CustomTreeNode pData, TreeNode? pobjParentNode = null) {
+    private void ChangeCheckedValueParent(TreeNode pobjNode) {
+        List<TreeNode> objParents = GetAllParentNodes(pobjNode);
+        this.ChangeParentState(objParents, pobjNode);
+    }
+
+    private TreeNode? AddNode(CustomTreeNode pData, TreeNode? pobjParentNode = null) {
         TreeNode? objRet = null;
 
         if (pData != null && pData.Node != null && !string.IsNullOrEmpty(pData.KeyPath)) {
@@ -914,7 +942,7 @@ public class DirTreeViewOcx : UserControl {
         return objRet;
     }
 
-    public void ClearAll() {
+    private void ClearAll() {
         try {
             this._tree.BeginUpdate();
             this._NodeData.Clear();
@@ -925,7 +953,7 @@ public class DirTreeViewOcx : UserControl {
         //System.Diagnostics.Debug.WriteLine("Arbre et dictionnaire vidés.");
     }
 
-    public CustomTreeNode? GetNodeDataByKey(string pstrKeyId) {
+    private CustomTreeNode? GetNodeDataByKey(string pstrKeyId) {
         CustomTreeNode? objRet = null;
 
         if (!string.IsNullOrEmpty(pstrKeyId)) {
@@ -971,4 +999,5 @@ public class DirTreeViewOcx : UserControl {
             }
         }
     }
+    #endregion Private functions
 }

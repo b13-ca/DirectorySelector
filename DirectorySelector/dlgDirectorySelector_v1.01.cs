@@ -40,7 +40,8 @@ public class DirectorySelector : Component {
     //private static readonly Size MINIMUM_SIZE = new Size(350 + 25, 400 + 50);
     private const string MINIMUM_SIZE_STR = "375, 450";
     private static readonly Size MINIMUM_SIZE = new Size(375, 450);
-    
+
+    #region Public Properties
     private Size _minimumSize = MINIMUM_SIZE;
     [Category("PrototypeOmega.Appearance")]
     [Description("The MinimumSize of the dialog window.")]
@@ -53,6 +54,11 @@ public class DirectorySelector : Component {
             this._minimumSize = this.GetValidSize(value);
         }
     }
+
+    [Category("PrototypeOmega.Behavior")]
+    [Description("Allow the component to accept multiple selection")]
+    [DefaultValue(typeof(bool), "True")]
+    public bool MultiSelect { get; set; } = true;
 
     private Size _size = MINIMUM_SIZE;
     [Category("PrototypeOmega.Appearance")]
@@ -93,6 +99,35 @@ public class DirectorySelector : Component {
             this._lstDirectory = value;
         }
     }
+    #endregion Public Properties
+
+    #region Public functions
+    public DialogResult ShowDialog(IWin32Window? owner = null) {
+        DialogResult objRet = DialogResult.None;
+
+        // Just-in-time initialization of the UI
+        using (DialogDirectorySelectorForm objForm = new DialogDirectorySelectorForm(this._minimumSize, this._size, this._title, this.MultiSelect, this._lstDirectory)) {
+            try {
+                // ShowDialog returns the DialogResult of the form
+                objRet = objForm.ShowDialog(owner);
+                // Check the result specifically for OK
+                if (objRet == DialogResult.OK) {
+                    // Only assign the final value if the operation succeeded (Just-in-Time)
+                    this._lstDirectory = [.. objForm._tree.GetUserSelection()];
+                } else {
+                    this._lstDirectory = [];
+                    //System.Diagnostics.Debug.WriteLine("Dialog cancelled or closed. Result: " + objRet.ToString());
+                }
+            } catch {
+                //} catch (Exception ex) {
+                //System.Diagnostics.Debug.WriteLine("Failed to show dialog: " + ex.Message);
+                objRet = DialogResult.Abort;
+            }
+        }
+
+        return objRet;
+    }
+    #endregion Public functions
 
     private Size GetValidSize(Size psz) {
         int lngSx = psz.Width;
@@ -108,42 +143,16 @@ public class DirectorySelector : Component {
 
         return new Size(lngSx, lngSy);
     }
-
-    public DialogResult ShowDialog(IWin32Window? owner = null) {
-        DialogResult objRet = DialogResult.None;
-
-        // Just-in-time initialization of the UI
-        using (DialogDirectorySelectorForm objForm = new DialogDirectorySelectorForm(this._minimumSize, this._size, this._title, this._lstDirectory)) {
-            try {
-                // ShowDialog returns the DialogResult of the form
-                objRet = objForm.ShowDialog(owner);
-                // Check the result specifically for OK
-                if (objRet == DialogResult.OK) {
-                    // Only assign the final value if the operation succeeded (Just-in-Time)
-                    this._lstDirectory = [.. objForm._tree.GetUserSelection()];
-                } else {
-                    this._lstDirectory = [];
-                    //System.Diagnostics.Debug.WriteLine("Dialog cancelled or closed. Result: " + objRet.ToString());
-                }
-            } catch {
-            //} catch (Exception ex) {
-                //System.Diagnostics.Debug.WriteLine("Failed to show dialog: " + ex.Message);
-                objRet = DialogResult.Abort;
-            }
-        }
-
-        return objRet;
-    }
 }
 
 internal class DialogDirectorySelectorForm : Form {
     public readonly DirTreeViewOcx _tree;
 
-    public DialogDirectorySelectorForm(Size pszMinimumSize, Size pszSize, string pstrTitle, List<string> plstUserSelection) {
+    public DialogDirectorySelectorForm(Size pszMinimumSize, Size pszSize, string pstrTitle, bool pblnMultiSelect, List<string> plstUserSelection) {
         this.MinimumSize = pszMinimumSize;
         this.Size = pszSize;
         this.Text = pstrTitle;
-        
+
         this.StartPosition = FormStartPosition.CenterParent;
         this.FormBorderStyle = FormBorderStyle.Sizable;
         this.MaximizeBox = true;
@@ -154,7 +163,8 @@ internal class DialogDirectorySelectorForm : Form {
             Left = 0,
             Width = this.ClientSize.Width,
             Height = this.ClientSize.Height,
-            Dock = DockStyle.Fill
+            Dock = DockStyle.Fill,
+            MultiSelect = pblnMultiSelect
         };
         this.Controls.Add(this._tree);
     }

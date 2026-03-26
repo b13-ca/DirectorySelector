@@ -19,6 +19,7 @@ public partial class Form1 : Form {
             objDialog.Title = "Select a directory... or more...";
             objDialog.Size = new System.Drawing.Size(500, 500);
             objDialog.MinimumSize = objDialog.Size;
+            objDialog.MultiSelect  = true;
 
             //** Here you tell the component to select the predefined value **//
             objDialog.UserSelection = this._lstDirectory;
