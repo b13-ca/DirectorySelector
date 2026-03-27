@@ -5,23 +5,17 @@ C# Windows form app DirectorySelector component
 
 ![DirectorySelector output](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/DirectorySelector/images/visual.png)
 
-
-<br /><br />
 ## License
 
 This project is open source, it can be shared with certain restrictions and limitations.  
 licensed under the [BSD 3-Clause License](https://opensource.org/license/bsd-3-clause/).  
 Please see the [LICENSE](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/LICENSE) for more information.
 
-
-<br /><br />
 ## Owner International Id
 
 The copyright Owner has the following International Identifier :  
 oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 
-
-<br /><br />
 ## Credits
 
 - This program contains only original work from [Patrice CHARBONNEAU](https://github.com/b13-ca/).
@@ -29,8 +23,6 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 - Images are derivative works based on royalty-free files.
 - The AI was dumb enough to try to help me.
 
-
-<br /><br />
 ## Links
 
 - [GitHub](https://github.com/b13-ca/)
@@ -38,8 +30,6 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 - [Twitch](https://www.twitch.tv/b13ca/)
 - [NuGet](https://www.nuget.org/profiles/b13-ca/)
 
-
-<br /><br />
 ## Revision
 
 ```
@@ -49,7 +39,6 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
                             Preparing constructor for v2 (with MultiSelect = false)
 ```
 
-<br /><br />
 ## Install
 
 - Install-Package DirectorySelector
