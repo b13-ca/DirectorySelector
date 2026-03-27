@@ -44,7 +44,7 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 
 2026-03-27 2026.3.27.38360  RC4 : Dialog MinimumSize property was renamed by mistake to MinimumDialogSize;
 
-2026-03-28 2026.4.1.90      Official release, versionning is Year, Major, Minor, Revision;
+2026-03-28 2026.4.1.89      Official release, versionning is Year, Major, Minor, Revision;
                             where revision is : (Year - 2026) * 372 + (Month * 31) + day;
 ```
 
