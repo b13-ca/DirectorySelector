@@ -39,12 +39,13 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
                             Preparing constructor for v2 (with MultiSelect = false);
 2026-03-27 2026.3.27.38341  Fixed an issue with MinSize;
                             Removed more reference to PrototypeOmega;
+2026-03-27 2026.3.27.38360  Dialog MinimumSize property was renamed by mistake to MinimumDialogSize;
 ```
 
 ## Known Bugs
 ```
 2026-03-27: When an initial branch with selection is not opened, the selection is not returned;
-            currently working on an update;
+            currently working on an update; workaround: don't use initial selection;
 ```
 
 

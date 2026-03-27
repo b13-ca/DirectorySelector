@@ -65,7 +65,7 @@ public class DirectorySelector : Component {
     [Category("b13.Appearance")]
     [Description("The MinimumSize of the dialog window.")]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Size MinimumDialogSize {
+    public Size MinimumSize {
         get {
             return this._minimumDialogSize;
         }

@@ -31,7 +31,7 @@
     <Description>High-performance c# WinForms components for directory navigation. Part of the b13 ecosystem.</Description>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageId>b13.DirectorySelector</PackageId>
-    <PackageProjectUrl>https://b13.ca/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/b13-ca/DirectorySelector/</PackageProjectUrl>
     <PackageTags>b13 PrototypeOmega dotnet csharp WinForms Components Dialogs</PackageTags>
 	
 	<PackageIconUrl></PackageIconUrl>
