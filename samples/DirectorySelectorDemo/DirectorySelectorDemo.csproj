@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="b13.DirectorySelector" Version="2026.3.27.38360" />
+    <ProjectReference Include="..\..\DirectorySelector\DirectorySelector.csproj" />
   </ItemGroup>
 
 </Project>

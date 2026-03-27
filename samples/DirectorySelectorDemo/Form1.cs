@@ -11,6 +11,7 @@ public partial class Form1 : Form {
 
         //** Here you can add default checked value **//
         this._lstDirectory.Add(@"C:\");
+        this._lstDirectory.Add(@"D:\Ecole");
         this._lstDirectory.Add(@"E:\");
     }
 

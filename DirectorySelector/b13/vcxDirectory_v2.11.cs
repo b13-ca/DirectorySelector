@@ -207,7 +207,7 @@ internal class StructDirectoryEx {
 
     #region public Functions
     //Validate if the directory can be accessed
-    public Boolean IsValidPath(String pstrPath) {
+    public static Boolean IsValidPath(String pstrPath) {
         Boolean blnReturnValue = false;
 
         try {
