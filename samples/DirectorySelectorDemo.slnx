@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../DirectorySelector/DirectorySelector.csproj" />
   <Project Path="DirectorySelectorDemo/DirectorySelectorDemo.csproj" />
 </Solution>
