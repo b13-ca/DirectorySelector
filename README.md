@@ -4,17 +4,20 @@ C# Windows form app DirectorySelector component
 **Visual**
 
 ![DirectorySelector output](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/DirectorySelector/images/visual.png)
+<br />
 
 ## License
 
 This project is open source, it can be shared with certain restrictions and limitations.  
 licensed under the [BSD 3-Clause License](https://opensource.org/license/bsd-3-clause/).  
 Please see the [LICENSE](https://raw.githubusercontent.com/b13-ca/DirectorySelector/main/LICENSE) for more information.
+<br />
 
 ## Owner International Id
 
 The copyright Owner has the following International Identifier :  
 oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
+<br />
 
 ## Credits
 
@@ -22,6 +25,7 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 - Some code snippets from the internet probably inspired me!
 - Images are derivative works based on royalty-free files.
 - The AI was dumb enough to try to help me.
+<br />
 
 ## Links
 
@@ -29,6 +33,7 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 - [YouTube](https://www.youtube.com/@b13-ca)
 - [Twitch](https://www.twitch.tv/b13ca/)
 - [NuGet](https://www.nuget.org/profiles/b13-ca/)
+<br />
 
 ## Revision
 
@@ -38,6 +43,7 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
                             Fix namespace (was left to PrototypeOmega instead of b13)
                             Preparing constructor for v2 (with MultiSelect = false)
 ```
+<br />
 
 ## Install
 
