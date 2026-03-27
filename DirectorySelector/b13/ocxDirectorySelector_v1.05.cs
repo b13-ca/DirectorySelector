@@ -24,6 +24,8 @@
 //                      now using b13 namespace;
 //                      MultiSelect is now part of constructor and made private;
 // v1.04 - 2026-03-27:  Adding ABSOLUTE_MIN_SIZE & MinimumSize as property;
+// v1.05 - 2026-03-27:  Fixing .Name vs .Text property; .Name is now unused;
+
 #endregion History
 
 using System.ComponentModel;
@@ -37,21 +39,16 @@ namespace b13;
 
 public class CustomTreeNode {
     private TreeNode _node;
-    private string _text;
     private string _shortText;
 
-    //string pstrData
     public CustomTreeNode(string pstrKey) {
         if (String.IsNullOrEmpty(pstrKey)) {
             throw new ArgumentNullException(nameof(pstrKey));
         }
 
         this._node = new TreeNode(pstrKey);  //This set Text, NOT NAME
-        this._text = pstrKey;
         this._shortText = System.IO.Path.GetFileName(pstrKey);
-
         this.HasChild = false;
-        //this.Checked = false;
     }
 
     public TreeNode objNode {
@@ -62,11 +59,11 @@ public class CustomTreeNode {
 
     public string Text {
         get {
-            return this._text;
+            return this._node.Text;
         }
 
         private set {
-            this._text = value;
+            this._node.Text = value;
         }
     }
 
@@ -79,15 +76,6 @@ public class CustomTreeNode {
             this._shortText = value;
         }
     }
-
-    //private TreeNode Node { 
-    //    get; 
-    //    set; 
-    //}
-
-    //public string KeyPath { get; set; } = pstrKey;
-
-    //public string TextName { get; set; }
 
     public bool HasChild { get; set; }
 
@@ -407,9 +395,9 @@ public class DirTreeViewOcx : UserControl {
 
                 // Vérification de l'état Checked
                 if (objCurrent.Checked) {
-                    // Dans votre structure, le DirectoryPath est stocké dans .Name
-                    if (!string.IsNullOrEmpty(objCurrent.Name)) {
-                        lstRet.Add(objCurrent.Name);
+                    // Dans votre structure, le DirectoryPath est stocké dans .Text
+                    if (!string.IsNullOrEmpty(objCurrent.Text)) {
+                        lstRet.Add(objCurrent.Text);
                     }
                 } else {
                     // On ajoute les enfants à la pile pour traitement ultérieur
@@ -757,7 +745,7 @@ public class DirTreeViewOcx : UserControl {
 
     #region Private functions
     private void OnInternalDrawNode(DrawTreeNodeEventArgs e) {
-        if (e != null && e.Node != null && !string.IsNullOrEmpty(e.Node.Name)) {
+        if (e != null && e.Node != null && !string.IsNullOrEmpty(e.Node.Text)) {
             TreeNode objNode = e.Node;
             if (e.Bounds.Width > 0 && e.Bounds.Height > 0) {
                 //const int lngPaddingX = 3;
@@ -765,7 +753,7 @@ public class DirTreeViewOcx : UserControl {
                 int lngScrollbarWidth = SystemInformation.VerticalScrollBarWidth;
 
                 bool blnHasChild = false;
-                CustomTreeNode? objTreeNode = this.GetNodeDataByKey(objNode.Name);
+                CustomTreeNode? objTreeNode = this.GetNodeDataByKey(objNode.Text);
                 if (objTreeNode != null) {
                     blnHasChild = objTreeNode.HasChild;
                 }
@@ -938,12 +926,12 @@ public class DirTreeViewOcx : UserControl {
         TreeViewHitTestInfo objInfo = this._tree.HitTest(e.Location);
         TreeNode? objNode = objInfo.Node;
 
-        if (objNode != null && !string.IsNullOrEmpty(objNode.Name)) {
+        if (objNode != null && !string.IsNullOrEmpty(objNode.Text)) {
             if (this._tree.Focused == false) {
                 this._tree.Focus();
             }
 
-            CustomTreeNode? objTreeNode = this.GetNodeDataByKey(objNode.Name);
+            CustomTreeNode? objTreeNode = this.GetNodeDataByKey(objNode.Text);
             if (objTreeNode != null) {
                 // 2. Définition de la zone réactive (Hitbox)
                 // On définit une zone de 40 pixels de large juste à gauche du texte
@@ -961,7 +949,7 @@ public class DirTreeViewOcx : UserControl {
                     }
 
                     this._tree.SelectedNode = objNode;
-                    this.TopLabelText = objNode.Name;
+                    this.TopLabelText = objNode.Text;
 
                     // we don't need to invalidate because internal proc use global invalidate on [.Expand] / [.Collapse] change
                     //this._tree.Invalidate(objNode.Bounds);
@@ -989,7 +977,7 @@ public class DirTreeViewOcx : UserControl {
                                 }
                             }
 
-                            this._LastNodeCheckedKey = objNode.Name;
+                            this._LastNodeCheckedKey = objNode.Text;
                         } else {
                             this._LastNodeCheckedKey = "";
                         }
@@ -998,14 +986,14 @@ public class DirTreeViewOcx : UserControl {
                     this.ChangeCheckedValueParent(objNode);
 
                     this._tree.SelectedNode = objNode;
-                    this.TopLabelText = objNode.Name;
+                    this.TopLabelText = objNode.Text;
 
                     // we don't need to invalidate because internal proc use global invalidate on [.Checked] change
                     //this._tree.Invalidate(objNode.Bounds);
                     return;
                 } else {
                     this._tree.SelectedNode = objNode;
-                    this.TopLabelText = objNode.Name;
+                    this.TopLabelText = objNode.Text;
 
                     this._tree.Invalidate(objNode.Bounds);
                 }
@@ -1036,7 +1024,7 @@ public class DirTreeViewOcx : UserControl {
             //bool blnValid = this._directoryEx.IsFolderValid(pData.KeyPath);
             bool blnValid = this._directoryEx.IsFolderValid(pData.Text);
             if (blnValid) {
-                //pData.Node.Name = pData.KeyPath;
+                //pData.Node.Text = pData.KeyPath;
 
                 // Si pParent est null, on ajoute à la racine (base.Nodes)
                 //if (pobjParentNode != null) {
@@ -1111,7 +1099,7 @@ public class DirTreeViewOcx : UserControl {
                 try {
                     this._tree.BeginUpdate();
                     objParentNode.Nodes.Clear();
-                    string strPath = objParentNode.Name;  // Le Name contient le chemin complet
+                    string strPath = objParentNode.Text;  // Le Name contient le chemin complet
 
                     // Logique de chargement des sous-répertoires ici
                     if (System.IO.Directory.Exists(strPath)) {
@@ -1121,7 +1109,7 @@ public class DirTreeViewOcx : UserControl {
                         foreach (string strEntry in arrDirs) {
                             // On crée la data et on l'ajoute au noeud qui s'expand
                             CustomTreeNode objData = new CustomTreeNode(strEntry);
-                            
+
                             // On utilise la méthode Add de notre UserControl
                             this.AddNode(objData, objParentNode);
                         }
