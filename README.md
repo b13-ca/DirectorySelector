@@ -33,19 +33,24 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 
 ## Revision
 ```
-2026-03-17 2026.3.17.23850  Initial release;
-2026-03-27 2026.3.27.37677  Fix version of Initial release in documentation;
+2026-03-17 2026.3.17.23850  RC1 : Release Candidate 1;
+
+2026-03-27 2026.3.27.37677  RC2 : Fix version of Initial release in documentation;
                             Fix namespace (was left to PrototypeOmega instead of b13);
                             Preparing constructor for v2 (with MultiSelect = false);
-2026-03-27 2026.3.27.38341  Fixed an issue with MinSize;
+
+2026-03-27 2026.3.27.38341  RC3 : Fixed an issue with MinSize;
                             Removed more reference to PrototypeOmega;
-2026-03-27 2026.3.27.38360  Dialog MinimumSize property was renamed by mistake to MinimumDialogSize;
+
+2026-03-27 2026.3.27.38360  RC4 : Dialog MinimumSize property was renamed by mistake to MinimumDialogSize;
+
+2026-03-28 2026.4.1.90      Official release, versionning is Year, Major, Minor, Revision;
+                            where revision is : (Year - 2026) * 372 + (Month * 31) + day;
 ```
 
 ## Known Bugs
 ```
-2026-03-27: When an initial branch with selection is not opened, the selection is not returned;
-            currently working on an update; workaround: don't use initial selection;
+2026-03-28: none but MultiSelect=False is not yet implemented;
 ```
 
 

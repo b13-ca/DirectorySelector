@@ -14,13 +14,22 @@
   </PropertyGroup>
   
   <PropertyGroup>
-	<Product>DirectorySelector</Product>
-	<Title>b13 DirectorySelector WinForms components for directory navigation</Title>
+    <Product>DirectorySelector</Product>
+    <Title>b13 DirectorySelector WinForms components for directory navigation</Title>
+    <VerMajor>4</VerMajor>
+    <VerMinor>1</VerMinor>
+
     <UtcYear>$([System.DateTime]::UtcNow.Year)</UtcYear>
-    <UtcMonth>$([System.DateTime]::UtcNow.Month)</UtcMonth>
+	<UtcMonth>$([System.DateTime]::UtcNow.Month)</UtcMonth>
     <UtcDay>$([System.DateTime]::UtcNow.Day)</UtcDay>
-    <MinutesSinceMonthStart>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::new($(UtcYear), $(UtcMonth), 1))).TotalMinutes.ToString("0"))</MinutesSinceMonthStart>
-    <Version>$(UtcYear).$(UtcMonth).$(UtcDay).$(MinutesSinceMonthStart)</Version>
+	<VerRevision>$([MSBuild]::Add(
+      $([MSBuild]::Add(
+        $([MSBuild]::Multiply($([MSBuild]::Subtract($(UtcYear), 2026)), 372)),
+        $([MSBuild]::Multiply($([MSBuild]::Subtract($(UtcMonth), 1)), 31))
+      )),
+      $(UtcDay)
+    ))</VerRevision>
+    <Version>$(UtcYear).$(VerMajor).$(VerMinor).$(VerRevision)</Version>
     <AssemblyName>b13.DirectorySelector</AssemblyName>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <Deterministic>false</Deterministic>

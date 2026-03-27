@@ -53,8 +53,8 @@ public class DirTreeViewOcx : UserControl {
     private TreeNode? _LastNodeChecked = null;
     private string _LastNodeCheckedKey = "";
 
-    private List<string> _lstInitialSelection = [];
-    private List<string> _lstDirectory = [];
+    private readonly List<string> _lstInitialSelection = [];
+    private List<string> _lstUserSelection = [];
     private readonly Form _Parent;
     private const int _SpacerX = 5;
 
@@ -104,7 +104,7 @@ public class DirTreeViewOcx : UserControl {
     #endregion InternalTreeView
 
     #region Constructor
-    private readonly Dictionary<string, string> _dicUserSelection = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _dicInitialSelection = new(StringComparer.OrdinalIgnoreCase);
     public DirTreeViewOcx(Form pobjParent, List<string> plstUserSelection, bool pblnMultiSelect = true) {
         // InitializeComponent()
         this._directoryEx = new();
@@ -282,7 +282,10 @@ public class DirTreeViewOcx : UserControl {
     }
 
     public List<string> GetUserSelection() {
-        return [.. this._lstDirectory];
+        //List<string> lstRet = [.. this._dicInitialSelection.Keys, .. this._lstUserSelection];
+        List<string> lstRet = [.. this._dicInitialSelection.Keys.Concat(this._lstUserSelection).Order()];
+
+        return lstRet;
     }
     #endregion Public Function
 
@@ -293,10 +296,11 @@ public class DirTreeViewOcx : UserControl {
         foreach (string strItem in plstUserSelection) {
             bool blnSuccess = CheckNodeFromKey(strItem);
             if (blnSuccess) {
-                this._dicUserSelection[strItem] = "";
+                this._dicInitialSelection[strItem] = "";
                 if (this.MultiSelect == false) {
                     break;
                 }
+            } else {
             }
         }
     }
@@ -306,9 +310,9 @@ public class DirTreeViewOcx : UserControl {
             Button objButton = (Button)sender;
             string strButtonTag = objButton.Tag + "";
             if (strButtonTag == "Select") {
-                this._lstDirectory = this.GetCheckedNodePathsIterative();
+                this._lstUserSelection = this.GetCheckedNodePathsIterative();
             } else {
-                this._lstDirectory = [];
+                this._lstUserSelection = [];
             }
         }
     }
@@ -665,32 +669,8 @@ public class DirTreeViewOcx : UserControl {
         //System.Diagnostics.Debug.WriteLine("Runtime : Arbre peuplé.");
     }
     #endregion OnEvent
-    
-    //private void panel1_Paint(object sender, PaintEventArgs e) {
-    //    //https://stackoverflow.com/questions/8283631/graphics-drawstring-vs-textrenderer-drawtextwhich-can-deliver-better-quality
-    //    //NOTE: Use GDI (.net compatible) and NOT GDI+ (leaking in .net)
-    //    //GDI   : TextRenderer.MeasureText, TextRenderer.DrawText
-    //    //GDI+  : graphics.MeasureString, graphics.DrawString
-    //    //use   : Application.SetCompatibleTextRenderingDefault(false);
 
-    //    //GDI (i.e. TextRenderer)
-    //    String s = "The quick brown fox jumped over the lazy dog";
-    //    Point origin = new Point(11, 11);
-    //    Font font = this.Font;
-
-    //    e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
-
-    //    TextRenderer.DrawText(e.Graphics, s, font, origin, SystemColors.InfoText);
-    //}
-
-    //private static int GetCheckboxPosition(int plngStartPos, int plngBoxSize) {
-    //    int lngRet = plngStartPos;
-    //    lngRet = lngRet + _CheckboxAlign + plngBoxSize;
-
-    //    return lngRet;
-    //}
-
-    #region Private functions
+    #region Private OnEvent
     private void OnInternalDrawNode(DrawTreeNodeEventArgs e) {
         if (e != null && e.Node != null && !string.IsNullOrEmpty(e.Node.Text)) {
             TreeNode objNode = e.Node;
@@ -793,6 +773,149 @@ public class DirTreeViewOcx : UserControl {
         }
     }
 
+    private void OnInternalMouseDown(MouseEventArgs e) {
+        // 1. Initialisation
+        TreeViewHitTestInfo objInfo = this._tree.HitTest(e.Location);
+        TreeNode? objNode = objInfo.Node;
+
+        if (objNode != null && !string.IsNullOrEmpty(objNode.Text)) {
+            if (this._tree.Focused == false) {
+                this._tree.Focus();
+            }
+
+            CustomTreeNode? objTreeNode = this.GetNodeDataByKey(objNode.Text);
+            if (objTreeNode != null) {
+                // 2. Définition de la zone réactive (Hitbox)
+                // On définit une zone de 40 pixels de large juste à gauche du texte
+                int lngPlusRectX = GetExpandButtonPosX(objNode);
+                int lngCheckRectX = this.GetCheckboxButtonPosX(lngPlusRectX);
+
+                // Clic sur le [+] / [-]
+                if ((e.X >= lngPlusRectX && e.X <= (lngPlusRectX + this.BoxHeight)) || e.Button == MouseButtons.Right) {
+                    if (objTreeNode.HasChild) {
+                        if (objNode.IsExpanded) {
+                            objNode.Collapse();
+                        } else {
+                            objNode.Expand();
+                        }
+                    }
+
+                    this._tree.SelectedNode = objNode;
+                    this.TopLabelText = objNode.Text;
+
+                    // we don't need to invalidate because internal proc use global invalidate on [.Expand] / [.Collapse] change
+                    //this._tree.Invalidate(objNode.Bounds);
+                    return;
+                } else if (e.X >= lngCheckRectX && e.X <= (lngCheckRectX + this.BoxHeight)) {
+                    // Clic sur la CheckBox
+                    objNode.Checked = !objNode.Checked;
+
+                    //Keeping value for SimpleSelect
+                    if (this.MultiSelect == false) {
+                        if (objNode.Checked) {
+                            //if (this._LastNodeChecked != null) {
+                            //    this._LastNodeChecked.Checked = false;
+                            //    //this.ChangeCheckedValueChild(this._LastNodeChecked);
+                            //}
+
+                            if (this._LastNodeCheckedKey.Length > 0) {
+                                //retrieve the real node
+                                //next line is not good, retrieve a CustomTreeNode, NOT a node
+                                CustomTreeNode? objSelectedNode = this.GetNodeDataByKey(this._LastNodeCheckedKey);
+                                if (objSelectedNode != null) {
+                                    //neeed fix here
+                                    //objSelectedNode?.Checked = false;
+                                    //this.ChangeCheckedValueChild(objSelectedNode);
+                                }
+                            }
+
+                            this._LastNodeCheckedKey = objNode.Text;
+                        } else {
+                            this._LastNodeCheckedKey = "";
+                        }
+                    }
+                    ChangeCheckedValueChild(objNode);
+                    this.ChangeCheckedValueParent(objNode);
+
+                    this._tree.SelectedNode = objNode;
+                    this.TopLabelText = objNode.Text;
+
+                    // we don't need to invalidate because internal proc use global invalidate on [.Checked] change
+                    //this._tree.Invalidate(objNode.Bounds);
+                    return;
+                } else {
+                    this._tree.SelectedNode = objNode;
+                    this.TopLabelText = objNode.Text;
+
+                    this._tree.Invalidate(objNode.Bounds);
+                }
+            }
+        }
+
+        base.OnMouseDown(e);
+    }
+
+    private void OnInternalBeforeExpand(TreeViewCancelEventArgs e) {
+        // 1. Déclaration explicite de la nullabilité
+        TreeNode? objParentNode = e.Node;
+
+        if (objParentNode != null) {
+            // 2. Vérification du dummy [+] node
+            if (objParentNode.Nodes.Count == 1 && objParentNode.Nodes[0].Text == "+") {
+                try {
+                    this._tree.BeginUpdate();
+                    objParentNode.Nodes.Clear();
+                    string strPath = objParentNode.Text;  // Le Name contient le chemin complet
+
+                    // Logique de chargement des sous-répertoires ici
+                    if (System.IO.Directory.Exists(strPath)) {
+                        // 3. Initialisation directe avec la valeur finale
+                        string[] arrDirs = this._directoryEx.GetVisibleDirectories(strPath);
+
+                        foreach (string strEntry in arrDirs) {
+                            // On crée la data et on l'ajoute au noeud qui s'expand
+                            CustomTreeNode objData = new CustomTreeNode(strEntry);
+
+                            // On utilise la méthode Add de notre UserControl
+                            this.AddNode(objData, objParentNode);
+                        }
+                    }
+                    //} catch (Exception ex) {
+                    //System.Diagnostics.Debug.WriteLine($"Erreur d'expansion : {ex.Message}");
+                } finally {
+                    this._tree.EndUpdate();
+                }
+            }
+        }
+    }
+
+    //private void panel1_Paint(object sender, PaintEventArgs e) {
+    //    //https://stackoverflow.com/questions/8283631/graphics-drawstring-vs-textrenderer-drawtextwhich-can-deliver-better-quality
+    //    //NOTE: Use GDI (.net compatible) and NOT GDI+ (leaking in .net)
+    //    //GDI   : TextRenderer.MeasureText, TextRenderer.DrawText
+    //    //GDI+  : graphics.MeasureString, graphics.DrawString
+    //    //use   : Application.SetCompatibleTextRenderingDefault(false);
+
+    //    //GDI (i.e. TextRenderer)
+    //    String s = "The quick brown fox jumped over the lazy dog";
+    //    Point origin = new Point(11, 11);
+    //    Font font = this.Font;
+
+    //    e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+
+    //    TextRenderer.DrawText(e.Graphics, s, font, origin, SystemColors.InfoText);
+    //}
+
+    //private static int GetCheckboxPosition(int plngStartPos, int plngBoxSize) {
+    //    int lngRet = plngStartPos;
+    //    lngRet = lngRet + _CheckboxAlign + plngBoxSize;
+
+    //    return lngRet;
+    //}
+
+    #endregion Private OnEvent
+
+    #region Private functions
     private void ChangeParentState(List<TreeNode> pobjParents, TreeNode pobjNode) {
         bool blnState = pobjNode.Checked;
 
@@ -868,88 +991,6 @@ public class DirTreeViewOcx : UserControl {
         return lstRet;
     }
 
-    private void OnInternalMouseDown(MouseEventArgs e) {
-        // 1. Initialisation
-        TreeViewHitTestInfo objInfo = this._tree.HitTest(e.Location);
-        TreeNode? objNode = objInfo.Node;
-
-        if (objNode != null && !string.IsNullOrEmpty(objNode.Text)) {
-            if (this._tree.Focused == false) {
-                this._tree.Focus();
-            }
-
-            CustomTreeNode? objTreeNode = this.GetNodeDataByKey(objNode.Text);
-            if (objTreeNode != null) {
-                // 2. Définition de la zone réactive (Hitbox)
-                // On définit une zone de 40 pixels de large juste à gauche du texte
-                int lngPlusRectX = GetExpandButtonPosX(objNode);
-                int lngCheckRectX = this.GetCheckboxButtonPosX(lngPlusRectX);
-
-                // Clic sur le [+] / [-]
-                if ((e.X >= lngPlusRectX && e.X <= (lngPlusRectX + this.BoxHeight)) || e.Button == MouseButtons.Right) {
-                    if (objTreeNode.HasChild) {
-                        if (objNode.IsExpanded) {
-                            objNode.Collapse();
-                        } else {
-                            objNode.Expand();
-                        }
-                    }
-
-                    this._tree.SelectedNode = objNode;
-                    this.TopLabelText = objNode.Text;
-
-                    // we don't need to invalidate because internal proc use global invalidate on [.Expand] / [.Collapse] change
-                    //this._tree.Invalidate(objNode.Bounds);
-                    return;
-                } else if (e.X >= lngCheckRectX && e.X <= (lngCheckRectX + this.BoxHeight)) {
-                    // Clic sur la CheckBox
-                    objNode.Checked = !objNode.Checked;
-
-                    //Keeping value for SimpleSelect
-                    if (this.MultiSelect == false) {
-                        if (objNode.Checked) {
-                            //if (this._LastNodeChecked != null) {
-                            //    this._LastNodeChecked.Checked = false;
-                            //    //this.ChangeCheckedValueChild(this._LastNodeChecked);
-                            //}
-
-                                if (this._LastNodeCheckedKey.Length > 0) {
-                                //retrieve the real node
-                                //next line is not good, retrieve a CustomTreeNode, NOT a node
-                                CustomTreeNode? objSelectedNode = this.GetNodeDataByKey(this._LastNodeCheckedKey);
-                                if (objSelectedNode != null) {
-                                    //neeed fix here
-                                    //objSelectedNode?.Checked = false;
-                                    //this.ChangeCheckedValueChild(objSelectedNode);
-                                }
-                            }
-
-                            this._LastNodeCheckedKey = objNode.Text;
-                        } else {
-                            this._LastNodeCheckedKey = "";
-                        }
-                    }
-                    ChangeCheckedValueChild(objNode);
-                    this.ChangeCheckedValueParent(objNode);
-
-                    this._tree.SelectedNode = objNode;
-                    this.TopLabelText = objNode.Text;
-
-                    // we don't need to invalidate because internal proc use global invalidate on [.Checked] change
-                    //this._tree.Invalidate(objNode.Bounds);
-                    return;
-                } else {
-                    this._tree.SelectedNode = objNode;
-                    this.TopLabelText = objNode.Text;
-
-                    this._tree.Invalidate(objNode.Bounds);
-                }
-            }
-        }
-
-        base.OnMouseDown(e);
-    }
-
     private static void ChangeCheckedValueChild(TreeNode pobjNode) {
         //Change all Child accordingly
         List<TreeNode> objChilds = GetAllChildNodes(pobjNode);
@@ -987,8 +1028,8 @@ public class DirTreeViewOcx : UserControl {
                 //    this._dicUserSelection.Remove(pData.KeyPath);
                 //    pData.Node.Checked = true;
                 //}
-                if (this._dicUserSelection.ContainsKey(pData.Text)) {
-                    this._dicUserSelection.Remove(pData.Text);
+                if (this._dicInitialSelection.ContainsKey(pData.Text)) {
+                    this._dicInitialSelection.Remove(pData.Text);
                     pData.Checked = true;
                 }
 
@@ -1034,40 +1075,6 @@ public class DirTreeViewOcx : UserControl {
         }
 
         return objRet;
-    }
-
-    private void OnInternalBeforeExpand(TreeViewCancelEventArgs e) {
-        // 1. Déclaration explicite de la nullabilité
-        TreeNode? objParentNode = e.Node;
-
-        if (objParentNode != null) {
-            // 2. Vérification du dummy [+] node
-            if (objParentNode.Nodes.Count == 1 && objParentNode.Nodes[0].Text == "+") {
-                try {
-                    this._tree.BeginUpdate();
-                    objParentNode.Nodes.Clear();
-                    string strPath = objParentNode.Text;  // Le Name contient le chemin complet
-
-                    // Logique de chargement des sous-répertoires ici
-                    if (System.IO.Directory.Exists(strPath)) {
-                        // 3. Initialisation directe avec la valeur finale
-                        string[] arrDirs = this._directoryEx.GetVisibleDirectories(strPath);
-
-                        foreach (string strEntry in arrDirs) {
-                            // On crée la data et on l'ajoute au noeud qui s'expand
-                            CustomTreeNode objData = new CustomTreeNode(strEntry);
-
-                            // On utilise la méthode Add de notre UserControl
-                            this.AddNode(objData, objParentNode);
-                        }
-                    }
-                    //} catch (Exception ex) {
-                    //System.Diagnostics.Debug.WriteLine($"Erreur d'expansion : {ex.Message}");
-                } finally {
-                    this._tree.EndUpdate();
-                }
-            }
-        }
     }
     #endregion Private functions
 }
