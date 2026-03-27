@@ -7,16 +7,21 @@
 // This source code is licensed under the [BSD 3-Clause "New" or "Revised" License] found
 // in the LICENSE file in the root directory of this source tree.
 
+#region Usage and dependency
 //*************************************************************************************************//
 //** WARNING: If you modify this file, you MUST rename it to exclude the version number :WARNING **//
 //*************************************************************************************************//
 //      Usage: Custom Template for Dialog using custom OCX
-// Dependency:
+// Dependency: ocxDirectorySelector_v1.04
+#endregion Usage and dependency
 
+#region History
 //    History:
 // v1.00 - 2026-03-15:	Init;
 // v1.01 - 2026-03-16:  oIId changed;
 // v1.02 - 2026-03-26:  now using b13 namespace;
+// v1.03 - 2026-03-27:  MinimumSize now coming from ocxDirectorySelector;
+#endregion History
 
 using System.ComponentModel;
 
@@ -28,54 +33,67 @@ namespace b13;
 
 //https://www.softpost.org/dotnet/csproj-file-explained-propetygroups-targetframework-itemgroup
 //<GenerateDocumentationFile>true</GenerateDocumentationFile>
-//[ToolboxItemFilter("PrototypeOmega", ToolboxItemFilterType.Allow)]
+//[ToolboxItemFilter("b13", ToolboxItemFilterType.Allow)]
 //[Guid("9A2B1C3D-4E5F-6A7B-8C9E-0E1F2A3B4C5E")]
 [ToolboxItem(true)]
 [ToolboxBitmap(typeof(DirectorySelector))]
-[Category("PrototypeOmega")]
+[Category("b13")]
 [Description("A custom directory selection dialog component.")]
 public class DirectorySelector : Component {
     //public DirectorySelector() {}
 
-    // Form min size must be (+25, +50) more then DirectorySelector windows dialog
-    //private static readonly Size MINIMUM_SIZE = new Size(350 + 25, 400 + 50);
-    private const string MINIMUM_SIZE_STR = "375, 450";
-    private static readonly Size MINIMUM_SIZE = new Size(375, 450);
-
     #region Public Properties
-    private Size _minimumSize = MINIMUM_SIZE;
-    [Category("PrototypeOmega.Appearance")]
-    [Description("The MinimumSize of the dialog window.")]
-    [DefaultValue(typeof(Size), MINIMUM_SIZE_STR)]
-    public Size MinimumSize {
-        get {
-            return this._minimumSize;
-        }
-        set {
-            this._minimumSize = GetValidSize(value);
-        }
-    }
-
-    [Category("PrototypeOmega.Behavior")]
+    [Category("b13.Behavior")]
     [Description("Allow the component to accept multiple selection")]
     [DefaultValue(typeof(bool), "True")]
     public bool MultiSelect { get; set; } = true;
 
-    private Size _size = MINIMUM_SIZE;
-    [Category("PrototypeOmega.Appearance")]
+    private Size _size = GetDialogValidSize(new Size(0, 0));
+    [Category("b13.Appearance")]
     [Description("The Size of the dialog window.")]
-    [DefaultValue(typeof(Size), MINIMUM_SIZE_STR)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Size Size {
         get {
             return this._size;
         }
         set {
-            this._size = GetValidSize(value);
+            this._size = GetDialogValidSize(value);
         }
     }
 
+    private Size _minimumDialogSize = GetDialogValidSize(new Size(0,0));
+    [Category("b13.Appearance")]
+    [Description("The MinimumSize of the dialog window.")]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Size MinimumDialogSize {
+        get {
+            return this._minimumDialogSize;
+        }
+        set {
+            this._minimumDialogSize = GetDialogValidSize(value);
+        }
+    }
+
+    private static Size GetDialogValidSize(Size psz) {
+        // [Form minSize] must be (+25, +50) more then [DirTreeViewOcx]
+        Size ocxMinSize = DirTreeViewOcx.ABSOLUTE_MIN_SIZE;
+        Size frmMinSize = new Size(ocxMinSize.Width + 25, ocxMinSize.Height + 50);
+
+        int lngSx = psz.Width;
+        if (lngSx < frmMinSize.Width) {
+            lngSx = frmMinSize.Width;
+        }
+
+        int lngSy = psz.Height;
+        if (lngSy < frmMinSize.Height) {
+            lngSy = frmMinSize.Height;
+        }
+
+        return new Size(lngSx, lngSy);
+    }
+
     private string _title = "Directory Selector";
-    [Category("PrototypeOmega.Appearance")]
+    [Category("b13.Appearance")]
     [Description("The title of the dialog window.")]
     [DefaultValue("Directory Selector")]
     public string Title {
@@ -88,7 +106,7 @@ public class DirectorySelector : Component {
     }
 
     private List<string> _lstDirectory = [];
-    [Category("PrototypeOmega.UserSelection")]
+    [Category("b13.UserSelection")]
     [Description("The list of directories selected by the user.")]
     [Browsable(false)] // Hide from property grid because it's runtime data
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -107,7 +125,7 @@ public class DirectorySelector : Component {
         DialogResult objRet = DialogResult.None;
 
         // Just-in-time initialization of the UI
-        using (DialogDirectorySelectorForm objForm = new DialogDirectorySelectorForm(this._minimumSize, this._size, this._title, this.MultiSelect, this._lstDirectory)) {
+        using (DialogDirectorySelectorForm objForm = new DialogDirectorySelectorForm(this._minimumDialogSize, this._size, this._title, this.MultiSelect, this._lstDirectory)) {
             try {
                 // ShowDialog returns the DialogResult of the form
                 objRet = objForm.ShowDialog(owner);
@@ -129,21 +147,6 @@ public class DirectorySelector : Component {
         return objRet;
     }
     #endregion Public functions
-
-    private static Size GetValidSize(Size psz) {
-        int lngSx = psz.Width;
-        int lngSy = psz.Height;
-
-        if (lngSx < MINIMUM_SIZE.Width) {
-            lngSx = MINIMUM_SIZE.Width;
-        }
-
-        if (lngSy < MINIMUM_SIZE.Height) {
-            lngSy = MINIMUM_SIZE.Height;
-        }
-
-        return new Size(lngSx, lngSy);
-    }
 }
 
 internal class DialogDirectorySelectorForm : Form {

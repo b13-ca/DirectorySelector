@@ -7,12 +7,15 @@
 // This source code is licensed under the [BSD 3-Clause "New" or "Revised" License] found
 // in the LICENSE file in the root directory of this source tree.
 
+#region Usage and dependency
 //*************************************************************************************************//
 //** WARNING: If you modify this file, you MUST rename it to exclude the version number :WARNING **//
 //*************************************************************************************************//
 //      Usage: Use Interrop to get a directory Tree, Use Event (not mandatory)
 // Dependency:
+#endregion Usage and dependency
 
+#region History
 //    History:
 // v2.00 - 2025-07-25:	Initial release;
 // v2.01 - 2025-08-10:  Exclude list can now include file;
@@ -36,6 +39,9 @@
 //                      Adding IsValidPath;
 //                      Adding Progress Event;
 //                      now using b13 namespace;
+// v2.11 - 2026-03-27   removing unused parent Form object;
+
+#endregion History
 
 #region b13 namespace
 #pragma warning disable IDE0130
@@ -45,6 +51,7 @@ namespace b13;
 
 #region ** Example of use **
 //Example of use:
+//  //valid for version 2026.3.17.23850
 //  this.InitSearch();
 //  private void InitSearch() {
 //      List<string> lstExtention = [];
@@ -151,6 +158,20 @@ internal class StructDirectoryEx {
     private string m_strBasePath = "";
     #endregion Declaration
 
+    #region Constructor
+    //There isn't one yet
+    //public void SetParent(Form pobjForm) {
+    //    if (UserForm == null) {
+    //        UserForm = pobjForm;
+    //    }
+    //}
+
+    //private Form? UserForm {
+    //    get;
+    //    set;
+    //}
+    #endregion Constructor
+
     #region Property
     public string BasePath {
         get {
@@ -184,6 +205,7 @@ internal class StructDirectoryEx {
     public List<string> ExcludedScan { get; set; } = [];
     #endregion Property
 
+    #region public Functions
     //Validate if the directory can be accessed
     public Boolean IsValidPath(String pstrPath) {
         Boolean blnReturnValue = false;
@@ -273,6 +295,32 @@ internal class StructDirectoryEx {
         return strRet;
     }
 
+    public string GetEntryName(string pstrEntry, string pstrSpecific = "") {
+        string strRet = "";
+
+        // 1. Protection contre les chaînes trop courtes
+        if (pstrEntry.Length >= 3) {
+            // 2. Utilisation d'un Span pour la lecture du préfixe (évite une allocation string)
+            ReadOnlySpan<char> span = pstrEntry.AsSpan();
+
+            // 3. Comparaison directe
+            if (pstrSpecific.Length > 0) {
+                if (pstrEntry[..3] == pstrSpecific) {
+                    strRet = pstrEntry[3..];
+                }
+            } else {
+                if (span.StartsWith("[F]") || span.StartsWith("[D]")) {
+                    strRet = pstrEntry[3..];
+                }
+            }
+        }
+
+        if (strRet.Length == 0) {
+            throw new NotImplementedException($"this is an invalid Entry [{pstrEntry}]");
+        }
+        return strRet;
+    }
+
     public void DoScanDirStruct(out List<string> plstScan, GroupOperation penmExtOperation = GroupOperation.IncludingOnly) {
         //Force a Directory Scan
         plstScan = [];
@@ -302,34 +350,9 @@ internal class StructDirectoryEx {
             RaiseEvent_DirectoryProgress(lngMaximum, 0);
         }
     }
+    #endregion public Functions
 
-    public string GetEntryName(string pstrEntry, string pstrSpecific = "") {
-        string strRet = "";
-
-        // 1. Protection contre les chaînes trop courtes
-        if (pstrEntry.Length >= 3) {
-            // 2. Utilisation d'un Span pour la lecture du préfixe (évite une allocation string)
-            ReadOnlySpan<char> span = pstrEntry.AsSpan();
-
-            // 3. Comparaison directe
-            if (pstrSpecific.Length > 0) {
-                if (pstrEntry[..3] == pstrSpecific) {
-                    strRet = pstrEntry[3..];
-                }
-            } else {
-                if (span.StartsWith("[F]") || span.StartsWith("[D]")) {
-                    strRet = pstrEntry[3..];
-                }
-            }
-        }
-
-        if (strRet.Length == 0) {
-            throw new NotImplementedException($"this is an invalid Entry [{pstrEntry}]");
-        }
-        return strRet;
-    }
-
-    #region Section for ScanDirStruct
+    #region private Section for ScanDirStruct
     // use DoScanDirStruct() for your program
     //Scan the directory structure only, retourne number of directory and optionally file
     private int ScanDirStruct(out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
@@ -437,9 +460,9 @@ internal class StructDirectoryEx {
 
         return lngSuccess;
     }
-    #endregion Section for ScanDirStruct
+    #endregion private Section for ScanDirStruct
 
-    #region Section for ScanDirectory
+    #region private Section for ScanDirectory
     private bool ScanDirectoryEx(int plngMaximum, out int plngDir, out int plngFiles, ref int plngTotalDir, ref int plngTotalFile, ref List<string> plstOutputList, GroupOperation penmExtOperation, string pstrRootPath, bool pblnBaseIsNotRoot) {
         //Earch time a file is HIT, it should EventIt to raise progression % based on a total of plngMaximum
         bool blnSuccess = true;
@@ -635,18 +658,7 @@ internal class StructDirectoryEx {
 
         return blnRet;
     }
-    #endregion Section for ScanDirectory
-
-    public void SetParent(Form pobjForm) {
-        if (UserForm == null) {
-            UserForm = pobjForm;
-        }
-    }
-
-    private Form? UserForm {
-        get;
-        set;
-    }
+    #endregion private Section for ScanDirectory
 
     #region EVENT section
     //https://www.tutorialsteacher.com/csharp/csharp-event

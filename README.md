@@ -35,8 +35,16 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 ```
 2026-03-17 2026.3.17.23850  Initial release;
 2026-03-27 2026.3.27.37677  Fix version of Initial release in documentation;
-                            Fix namespace (was left to PrototypeOmega instead of b13)
-                            Preparing constructor for v2 (with MultiSelect = false)
+                            Fix namespace (was left to PrototypeOmega instead of b13);
+                            Preparing constructor for v2 (with MultiSelect = false);
+2026-03-27 2026.3.27.38341  Fixed an issue with MinSize;
+                            Removed more reference to PrototypeOmega;
+```
+
+## Known Bugs
+```
+2026-03-27: When an initial branch with selection is not opened, the selection is not returned;
+            currently working on an update;
 ```
 
 

@@ -7,12 +7,15 @@
 // This source code is licensed under the [BSD 3-Clause "New" or "Revised" License] found
 // in the LICENSE file in the root directory of this source tree.
 
+#region Usage and dependency
 //*************************************************************************************************//
 //** WARNING: If you modify this file, you MUST rename it to exclude the version number :WARNING **//
 //*************************************************************************************************//
 //      Usage: Custom TreeView control to be used in Directory selection
 // Dependency: vcxDirectory_2.08
+#endregion Usage and dependency
 
+#region History
 //    History:
 // v1.00 - 2026-03-14:	Init;
 // v1.01 - 2026-03-15:  Run as component, accept Form as constructor parameter
@@ -20,6 +23,8 @@
 // v1.03 - 2026-03-26:  now using non static vcxDirectory_v2.10;
 //                      now using b13 namespace;
 //                      MultiSelect is now part of constructor and made private;
+// v1.04 - 2026-03-27:  Adding ABSOLUTE_MIN_SIZE & MinimumSize as property;
+#endregion History
 
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -56,7 +61,6 @@ public class DirTreeViewOcx : UserControl {
     //private TreeNode? _LastNodeSelect = null;
     private string _SelectedNodeKey = "";
     private List<string> _lstDirectory = [];
-    private Size _MinimumSize = new Size(350, 400);
     private readonly Form _Parent;
     private const int _SpacerX = 5;
 
@@ -204,15 +208,43 @@ public class DirTreeViewOcx : UserControl {
             this._pnlButton?.Dispose();
             this._cmdButtonCancel?.Dispose();
             this._cmdButtonSelect?.Dispose();
-            System.Diagnostics.Trace.WriteLine("PrototypeOmega: DirTreeViewOcx Disposed.");
+            System.Diagnostics.Trace.WriteLine("b13: DirTreeViewOcx Disposed.");
         }
         base.Dispose(disposing);
     }
     #endregion Constructor
 
-    #region Public Function/Properties Get; Set;
-    private bool MultiSelect { get; set; } = true;
+    #region Properties
+    public static readonly Size ABSOLUTE_MIN_SIZE = new Size(350, 400);
+    private Size _minimumSize = ABSOLUTE_MIN_SIZE;
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public new Size MinimumSize {
+        get {
+            return this._minimumSize;
+        }
+        set {
+            this._minimumSize = GetValidSize(value);
+        }
+    }
+
+    private static Size GetValidSize(Size psz) {
+        int lngSx = psz.Width;
+        int lngSy = psz.Height;
+
+        if (lngSx < ABSOLUTE_MIN_SIZE.Width) {
+            lngSx = ABSOLUTE_MIN_SIZE.Width;
+        }
+
+        if (lngSy < ABSOLUTE_MIN_SIZE.Height) {
+            lngSy = ABSOLUTE_MIN_SIZE.Height;
+        }
+
+        return new Size(lngSx, lngSy);
+    }
+    #endregion Properties
+
+    #region Public Function
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Color ColorSquare { get; set; } = Color.Navy;
 
@@ -257,9 +289,11 @@ public class DirTreeViewOcx : UserControl {
     public List<string> GetUserSelection() {
         return [.. this._lstDirectory];
     }
-    #endregion Public Function/Properties Get; Set;
+    #endregion Public Function
 
     #region Private section
+    private bool MultiSelect { get; set; } = true;
+
     private void BuildDefaultDictionary(List<string> plstUserSelection) {
         foreach (string strItem in plstUserSelection) {
             this._dicUserSelection[strItem] = "";
@@ -546,7 +580,6 @@ public class DirTreeViewOcx : UserControl {
         public int cy;
         public int flags;
     }
-    #endregion MinSize override section
 
     protected override void WndProc(ref Message m) {
         if (m.Msg == WM_WINDOWPOSCHANGING) {
@@ -559,13 +592,13 @@ public class DirTreeViewOcx : UserControl {
                 if ((objUpdate.flags & SWP_NOSIZE) == 0) {
                     bool blnChanged = false;
 
-                    if (objUpdate.cx < this._MinimumSize.Width) {
-                        objUpdate.cx = this._MinimumSize.Width;
+                    if (objUpdate.cx < ABSOLUTE_MIN_SIZE.Width) {
+                        objUpdate.cx = ABSOLUTE_MIN_SIZE.Width;
                         blnChanged = true;
                     }
 
-                    if (objUpdate.cy < this._MinimumSize.Height) {
-                        objUpdate.cy = this._MinimumSize.Height;
+                    if (objUpdate.cy < ABSOLUTE_MIN_SIZE.Height) {
+                        objUpdate.cy = ABSOLUTE_MIN_SIZE.Height;
                         blnChanged = true;
                     }
 
@@ -581,6 +614,7 @@ public class DirTreeViewOcx : UserControl {
 
         base.WndProc(ref m);
     }
+    #endregion MinSize override section
 
     protected override void OnResize(EventArgs e) {
         base.OnResize(e);

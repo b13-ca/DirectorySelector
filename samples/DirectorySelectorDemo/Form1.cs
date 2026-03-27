@@ -31,6 +31,11 @@ public partial class Form1 : Form {
                 //** THIS IS WHERE YOU GET BACK USER SELECTION **//
                 this._lstDirectory = objDialog.UserSelection;
                 //System.Diagnostics.Debug.WriteLine(this._lstDirectory.Count);
+
+                System.Diagnostics.Debug.WriteLine("");
+                foreach (string strData in this._lstDirectory) {
+                    System.Diagnostics.Debug.WriteLine(strData);
+                }
             }
         }
     }
