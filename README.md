@@ -47,7 +47,7 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
                             Fix namespace (was left to PrototypeOmega instead of b13)  
                             Preparing constructor for v2 (with MultiSelect = false)  
 
-  
+<br>
 ## Install
 
 - Install-Package DirectorySelector
