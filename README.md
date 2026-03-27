@@ -42,10 +42,12 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 <br /><br />
 ## Revision
 
+```
 2026-03-17 2026.3.17.23850  Initial release;<br />
 2026-03-27 2026.3.27.37677  Fix version of Initial release in documentation;<br />
                             Fix namespace (was left to PrototypeOmega instead of b13)<br />
                             Preparing constructor for v2 (with MultiSelect = false)<br />
+```
 
 <br /><br />
 ## Install
