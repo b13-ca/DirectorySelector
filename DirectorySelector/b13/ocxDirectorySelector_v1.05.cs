@@ -37,59 +37,6 @@ namespace b13;
 #pragma warning restore IDE0130
 #endregion b13 namespace
 
-public class CustomTreeNode {
-    private TreeNode _node;
-    private string _shortText;
-
-    public CustomTreeNode(string pstrKey) {
-        if (String.IsNullOrEmpty(pstrKey)) {
-            throw new ArgumentNullException(nameof(pstrKey));
-        }
-
-        this._node = new TreeNode(pstrKey);  //This set Text, NOT NAME
-        this._shortText = System.IO.Path.GetFileName(pstrKey);
-        this.HasChild = false;
-    }
-
-    public TreeNode objNode {
-        get {
-            return this._node;
-        }
-    }
-
-    public string Text {
-        get {
-            return this._node.Text;
-        }
-
-        private set {
-            this._node.Text = value;
-        }
-    }
-
-    public string ShortText {
-        get {
-            return this._shortText;
-        }
-
-        private set {
-            this._shortText = value;
-        }
-    }
-
-    public bool HasChild { get; set; }
-
-    public bool Checked {
-        get {
-            return this._node.Checked;
-        }
-
-        set {
-            this._node.Checked = value;
-        }
-    }
-}
-
 [ToolboxItem(false)]
 [Description("A custom treeview for directory browsing")]
 //[DefaultEvent("NodeChecked")] //plus tard...
@@ -1045,7 +992,7 @@ public class DirTreeViewOcx : UserControl {
                     pData.Checked = true;
                 }
 
-                targetNodes.Add(pData.objNode);
+                targetNodes.Add(pData.TreeNode);
                 if (pobjParentNode != null && pobjParentNode.Checked) {
                     pData.Checked = pobjParentNode.Checked;
                 }
@@ -1055,12 +1002,12 @@ public class DirTreeViewOcx : UserControl {
                 pData.HasChild = this._directoryEx.HasSubDirectories(pData.Text);
                 if (pData.HasChild) {
                     //System.Diagnostics.Debug.WriteLine($"::{pData.Node.Text}");
-                    pData.objNode.Nodes.Add("+"); // Dummy pour le [+]
+                    pData.TreeNode.Nodes.Add("+"); // Dummy pour le [+]
                 }
 
                 //this._NodeData[pData.KeyPath] = pData;
                 this._NodeData[pData.Text] = pData;
-                objRet = pData.objNode;
+                objRet = pData.TreeNode;
                 //System.Diagnostics.Debug.WriteLine($"Node ajouté avec clé : {pData.DirectoryPath}");
             }
         }
@@ -1124,3 +1071,60 @@ public class DirTreeViewOcx : UserControl {
     }
     #endregion Private functions
 }
+
+#region class CustomTreeNode
+public class CustomTreeNode {
+    private TreeNode _node;
+    private string _shortText;
+
+    public CustomTreeNode(string pstrKey) {
+        if (String.IsNullOrEmpty(pstrKey)) {
+            throw new ArgumentNullException(nameof(pstrKey));
+        }
+
+        this._node = new TreeNode(pstrKey);  //This set Text, NOT NAME
+        this._shortText = System.IO.Path.GetFileName(pstrKey);
+        this.HasChild = false;
+    }
+
+    public TreeNode TreeNode {
+        get {
+            return this._node;
+        }
+    }
+
+    public string Text {
+        get {
+            return this._node.Text;
+        }
+
+        private set {
+            this._node.Text = value;
+        }
+    }
+
+    public bool Checked {
+        get {
+            return this._node.Checked;
+        }
+
+        set {
+            this._node.Checked = value;
+        }
+    }
+
+    public string ShortText {
+        get {
+            return this._shortText;
+        }
+
+        private set {
+            this._shortText = value;
+        }
+    }
+
+    public bool HasChild {
+        get; set;
+    }
+}
+#endregion class CustomTreeNode
