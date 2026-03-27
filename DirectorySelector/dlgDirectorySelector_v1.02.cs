@@ -16,14 +16,15 @@
 //    History:
 // v1.00 - 2026-03-15:	Init;
 // v1.01 - 2026-03-16:  oIId changed;
+// v1.02 - 2026-03-26:  now using b13 namespace;
 
 using System.ComponentModel;
 
-#region PrototypeOmega namespace
+#region b13 namespace
 #pragma warning disable IDE0130
-namespace PrototypeOmega;
+namespace b13;
 #pragma warning restore IDE0130
-#endregion PrototypeOmega namespace
+#endregion b13 namespace
 
 //https://www.softpost.org/dotnet/csproj-file-explained-propetygroups-targetframework-itemgroup
 //<GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -51,7 +52,7 @@ public class DirectorySelector : Component {
             return this._minimumSize;
         }
         set {
-            this._minimumSize = this.GetValidSize(value);
+            this._minimumSize = GetValidSize(value);
         }
     }
 
@@ -69,7 +70,7 @@ public class DirectorySelector : Component {
             return this._size;
         }
         set {
-            this._size = this.GetValidSize(value);
+            this._size = GetValidSize(value);
         }
     }
 
@@ -129,7 +130,7 @@ public class DirectorySelector : Component {
     }
     #endregion Public functions
 
-    private Size GetValidSize(Size psz) {
+    private static Size GetValidSize(Size psz) {
         int lngSx = psz.Width;
         int lngSy = psz.Height;
 
@@ -158,13 +159,12 @@ internal class DialogDirectorySelectorForm : Form {
         this.MaximizeBox = true;
         this.MinimizeBox = false;
 
-        this._tree = new(this, plstUserSelection) {
+        this._tree = new(this, plstUserSelection, pblnMultiSelect) {
             Top = 0,
             Left = 0,
             Width = this.ClientSize.Width,
             Height = this.ClientSize.Height,
             Dock = DockStyle.Fill,
-            MultiSelect = pblnMultiSelect
         };
         this.Controls.Add(this._tree);
     }

@@ -1,4 +1,4 @@
-using PrototypeOmega;
+using b13;
 
 namespace DirectorySelectorDemo;
 
@@ -11,7 +11,7 @@ public partial class Form1 : Form {
 
         //** Here you can add default checked value **//
         this._lstDirectory.Add(@"C:\");
-        //this._lstDirectory.Add(@"E:\");
+        this._lstDirectory.Add(@"E:\");
     }
 
     private void CmdOpenDialog_Click(object? sender, EventArgs e) {
@@ -19,7 +19,7 @@ public partial class Form1 : Form {
             objDialog.Title = "Select a directory... or more...";
             objDialog.Size = new System.Drawing.Size(500, 500);
             objDialog.MinimumSize = objDialog.Size;
-            objDialog.MultiSelect  = true;
+            objDialog.MultiSelect  = false;
 
             //** Here you tell the component to select the predefined value **//
             objDialog.UserSelection = this._lstDirectory;

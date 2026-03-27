@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="b13.DirectorySelector" Version="2026.3.20.28630" />
+    <PackageReference Include="b13.DirectorySelector" Version="2026.3.27.37662" />
   </ItemGroup>
 
 </Project>

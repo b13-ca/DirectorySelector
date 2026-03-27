@@ -37,11 +37,12 @@ oIId: v2.00/2032/160e0e6a3176a8c4235332aa8e0d422c
 
 ## Revision
 
-2026-03-17 2026.3.17.23850 - Initial release
-
+2026-03-17 2026.3.17.23850	Initial release;
+2026-03-27 2026.3.27.37677	Fix version of Initial release in documentation;
+							Fix namespace (was left to PrototypeOmega instead of b13)
+							Preparing constructor for v2 (with MultiSelect = false)
 
 ## Install
 
 - Install-Package DirectorySelector
 - dotnet add package DirectorySelector
-- dotnet add package DirectorySelector --version 2026.3.16.23020

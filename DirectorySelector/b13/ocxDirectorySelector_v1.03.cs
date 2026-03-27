@@ -17,15 +17,18 @@
 // v1.00 - 2026-03-14:	Init;
 // v1.01 - 2026-03-15:  Run as component, accept Form as constructor parameter
 // v1.02 - 2026-03-16:  oIId changed;
+// v1.03 - 2026-03-26:  now using non static vcxDirectory_v2.10;
+//                      now using b13 namespace;
+//                      MultiSelect is now part of constructor and made private;
 
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-#region PrototypeOmega namespace
+#region b13 namespace
 #pragma warning disable IDE0130
-namespace PrototypeOmega;
+namespace b13;
 #pragma warning restore IDE0130
-#endregion PrototypeOmega namespace
+#endregion b13 namespace
 
 public class CustomTreeNode(string pstrKey, string pstrText) {
     public TreeNode Node { get; set; } = new TreeNode(pstrKey);
@@ -42,6 +45,7 @@ public class CustomTreeNode(string pstrKey, string pstrText) {
 //[DefaultEvent("NodeChecked")] //plus tard...
 public class DirTreeViewOcx : UserControl {
     #region local variables
+    private readonly StructDirectoryEx _directoryEx;
     private readonly InternalTreeView _tree;
     private readonly Panel _topPanelLabel;
     private readonly Label _topLabel;
@@ -49,7 +53,8 @@ public class DirTreeViewOcx : UserControl {
     private readonly Button _cmdButtonCancel;
     private readonly Button _cmdButtonSelect;
 
-    private TreeNode? _LastNodeSelect = null;
+    //private TreeNode? _LastNodeSelect = null;
+    private string _SelectedNodeKey = "";
     private List<string> _lstDirectory = [];
     private Size _MinimumSize = new Size(350, 400);
     private readonly Form _Parent;
@@ -102,8 +107,9 @@ public class DirTreeViewOcx : UserControl {
 
     #region Constructor
     private readonly Dictionary<string, string> _dicUserSelection = new(StringComparer.OrdinalIgnoreCase);
-    public DirTreeViewOcx(Form pobjParent, List<string> plstUserSelection) {
+    public DirTreeViewOcx(Form pobjParent, List<string> plstUserSelection, bool pblnMultiSelect = true) {
         // InitializeComponent()
+        this._directoryEx = new();
         this._tree = new();
         this._topPanelLabel = new();
         this._topLabel = new();
@@ -141,7 +147,6 @@ public class DirTreeViewOcx : UserControl {
         this._topLabel.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
         this._topLabel.Top = -1;
         this._topPanelLabel.Controls.Add(this._topLabel);
-
 
         //*******************************************
         //**  Button
@@ -185,6 +190,7 @@ public class DirTreeViewOcx : UserControl {
 
         FixButtons();
 
+        //this.MultiSelect = pblnMultiSelect;
         this.BuildDefaultDictionary(plstUserSelection);
     }
 
@@ -205,8 +211,7 @@ public class DirTreeViewOcx : UserControl {
     #endregion Constructor
 
     #region Public Function/Properties Get; Set;
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool MultiSelect { get; set; } = true;
+    private bool MultiSelect { get; set; } = true;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Color ColorSquare { get; set; } = Color.Navy;
@@ -258,6 +263,9 @@ public class DirTreeViewOcx : UserControl {
     private void BuildDefaultDictionary(List<string> plstUserSelection) {
         foreach (string strItem in plstUserSelection) {
             this._dicUserSelection[strItem] = "";
+            if (this.MultiSelect == false) {
+                break;
+            }
         }
     }
 
@@ -481,7 +489,7 @@ public class DirTreeViewOcx : UserControl {
         List<string>? lstNodes = plstRootNodes;
         if (lstNodes == null) {
             //By default the TreeView contain all Physical Drive
-            lstNodes = StructDirectoryEx.GetPhysicalDrives();
+            lstNodes = this._directoryEx.GetPhysicalDrives();
         }
 
         if (lstNodes.Count > 0) {
@@ -857,13 +865,25 @@ public class DirTreeViewOcx : UserControl {
                     //Keeping value for SimpleSelect
                     if (this.MultiSelect == false) {
                         if (objNode.Checked) {
-                            if (this._LastNodeSelect != null) {
-                                this._LastNodeSelect.Checked = false;
-                                //this.ChangeCheckedValueChild(this._LastNodeSelect);
+                            //if (this._LastNodeSelect != null) {
+                            //    this._LastNodeSelect.Checked = false;
+                            //    //this.ChangeCheckedValueChild(this._LastNodeSelect);
+                            //}
+
+                            if (this._SelectedNodeKey.Length > 0) {
+                                //retrieve the real node
+                                //next line is not good, retrieve a CustomTreeNode, NOT a node
+                                CustomTreeNode? objSelectedNode = this.GetNodeDataByKey(this._SelectedNodeKey);
+                                if (objSelectedNode != null) {
+                                    //neeed fix here
+                                    //objSelectedNode?.Checked = false;
+                                    //this.ChangeCheckedValueChild(objSelectedNode);
+                                }
                             }
-                            this._LastNodeSelect = objNode;
+
+                            this._SelectedNodeKey = objNode.Name;
                         } else {
-                            this._LastNodeSelect = null;
+                            this._SelectedNodeKey = "";
                         }
                     }
                     ChangeCheckedValueChild(objNode);
@@ -904,7 +924,7 @@ public class DirTreeViewOcx : UserControl {
         TreeNode? objRet = null;
 
         if (pData != null && pData.Node != null && !string.IsNullOrEmpty(pData.KeyPath)) {
-            bool blnValid = StructDirectoryEx.IsFolderValid(pData.KeyPath);
+            bool blnValid = this._directoryEx.IsFolderValid(pData.KeyPath);
             if (blnValid) {
                 pData.Node.Name = pData.KeyPath;
 
@@ -927,7 +947,7 @@ public class DirTreeViewOcx : UserControl {
                 }
 
                 //do we need to add Dummy [+] node
-                pData.HasChild = StructDirectoryEx.HasSubDirectories(pData.KeyPath);
+                pData.HasChild = this._directoryEx.HasSubDirectories(pData.KeyPath);
                 if (pData.HasChild) {
                     //System.Diagnostics.Debug.WriteLine($"::{pData.Node.Text}");
                     pData.Node.Nodes.Add("+"); // Dummy pour le [+]
@@ -978,7 +998,7 @@ public class DirTreeViewOcx : UserControl {
                     // Logique de chargement des sous-répertoires ici
                     if (System.IO.Directory.Exists(strPath)) {
                         // 3. Initialisation directe avec la valeur finale
-                        string[] arrDirs = StructDirectoryEx.GetVisibleDirectories(strPath);
+                        string[] arrDirs = this._directoryEx.GetVisibleDirectories(strPath);
 
                         foreach (string strEntry in arrDirs) {
                             string strFolderName = System.IO.Path.GetFileName(strEntry);

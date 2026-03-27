@@ -31,12 +31,17 @@
 //                      Add HasSubDirectories();
 // v2.09 - 2026-03-16   Mod Licence heading;
 //                      oIId changed;
+// v2.10 - 2026-03-26   Transfering old function from v1.03;
+//                      Removing static;
+//                      Adding IsValidPath;
+//                      Adding Progress Event;
+//                      now using b13 namespace;
 
-#region PrototypeOmega namespace
+#region b13 namespace
 #pragma warning disable IDE0130
-namespace PrototypeOmega;
+namespace b13;
 #pragma warning restore IDE0130
-#endregion PrototypeOmega namespace
+#endregion b13 namespace
 
 #region ** Example of use **
 //Example of use:
@@ -47,7 +52,7 @@ namespace PrototypeOmega;
 //      StructDirectoryEx.BasePath = AppExPath.GetAppPath;
 //
 //      StructDirectoryEx.ExcludedScan.Add("[D].vs");
-//      StructDirectoryEx.DirectoryScan_Completed += this.StructDirectoryEx_DirectoryScan_Completed;
+//      StructDirectoryEx.OnDirectoryEvent += this.OnDirectoryEvent;
 //
 //      StructDirectoryEx.ScanFilename = false;
 //      StructDirectoryEx.IncludeDirectory = true;  //will turn on anyway if [StructDirectoryEx.ScanFilename = false]
@@ -69,7 +74,7 @@ namespace PrototypeOmega;
 //      StructDirectoryEx.DoScanDirStruct(out glstScan);
 //  }
 
-//  private void StructDirectoryEx_DirectoryScan_Completed(object? sender, StructDirectoryEx.MyEventArgs e) {
+//  private void OnDirectoryEvent(object? sender, StructDirectoryEx.MyEventArgs e) {
 //      int lngDebug = 0;
 //      switch (e.ArgEventNo) {
 //          case 1:
@@ -108,17 +113,17 @@ namespace PrototypeOmega;
 //  }
 #endregion ** Example of use **
 
-internal static class StructDirectoryEx {
+internal class StructDirectoryEx {
     #region Declaration
     public enum GroupOperation {
         IncludingOnly,
         ExcludingAll
     }
 
-    const int MAX_PATH = 260;
+    private const int MAX_PATH = 260;
 
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-    struct WIN32_FIND_DATA {
+    private struct WIN32_FIND_DATA {
         public FileAttributes dwFileAttributes;
         public System.Runtime.InteropServices.ComTypes.FILETIME ftCreationTime;
         public System.Runtime.InteropServices.ComTypes.FILETIME ftLastAccessTime;
@@ -134,20 +139,20 @@ internal static class StructDirectoryEx {
     }
 
     [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-    static extern IntPtr FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
+    private static extern IntPtr FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
 
     [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-    static extern bool FindNextFile(IntPtr hFindFile, out WIN32_FIND_DATA lpFindFileData);
+    private static extern bool FindNextFile(IntPtr hFindFile, out WIN32_FIND_DATA lpFindFileData);
 
     [System.Runtime.InteropServices.DllImport("kernel32.dll")]
-    static extern bool FindClose(IntPtr hFindFile);
+    private static extern bool FindClose(IntPtr hFindFile);
 
     // ***************************************************************
-    private static string m_strBasePath = "";
+    private string m_strBasePath = "";
     #endregion Declaration
 
     #region Property
-    public static string BasePath {
+    public string BasePath {
         get {
             return m_strBasePath;
         }
@@ -159,27 +164,40 @@ internal static class StructDirectoryEx {
         }
     }
 
-    public static bool ScanFilename { get; set; } = true;
+    public bool ScanFilename { get; set; } = true;
 
-    public static bool Recursive { get; set; } = true;
+    public bool Recursive { get; set; } = true;
 
-    public static bool Cancel { get; set; } = false;
+    public bool Cancel { get; set; } = false;
 
-    public static bool IncludeFullPath { get; set; } = false;
+    public bool IncludeFullPath { get; set; } = false;
 
-    public static bool IncludeDirectory { get; set; } = false;
+    public bool IncludeDirectory { get; set; } = false;
 
     //List of accepted/excluded file extention to look for when scanning
-    public static List<string> ExtentionF { get; set; } = [];
+    public List<string> ExtentionF { get; set; } = [];
 
     //List of accepted/excluded directory extention to look for when scanning
-    public static List<string> ExtentionD { get; set; } = [];
+    public List<string> ExtentionD { get; set; } = [];
 
     //Excluded [D]DirName and [F]Filename from scan
-    public static List<string> ExcludedScan { get; set; } = [];
+    public List<string> ExcludedScan { get; set; } = [];
     #endregion Property
 
-    public static List<string> GetPhysicalDrives() {
+    //Validate if the directory can be accessed
+    public Boolean IsValidPath(String pstrPath) {
+        Boolean blnReturnValue = false;
+
+        try {
+            List<String> lstScan = new List<String>(Directory.EnumerateDirectories(pstrPath));
+            blnReturnValue = true;
+        } catch {
+        }
+
+        return blnReturnValue;
+    }
+
+    public List<string> GetPhysicalDrives() {
         List<string> lstRet = [];
 
         try {
@@ -202,7 +220,7 @@ internal static class StructDirectoryEx {
         return lstRet;
     }
 
-    public static bool IsFolderValid(string pstrPath) {
+    public bool IsFolderValid(string pstrPath) {
         bool blnRet = false;
 
         if (!string.IsNullOrEmpty(pstrPath)) {
@@ -212,7 +230,7 @@ internal static class StructDirectoryEx {
         return blnRet;
     }
 
-    public static bool HasSubDirectories(string pstrPath) {
+    public bool HasSubDirectories(string pstrPath) {
         bool blnRet = false;
 
         try {
@@ -233,7 +251,7 @@ internal static class StructDirectoryEx {
         return blnRet;
     }
 
-    public static string[] GetVisibleDirectories(string pstrPath) {
+    public string[] GetVisibleDirectories(string pstrPath) {
         string[] strRet = [];
 
         try {
@@ -255,13 +273,13 @@ internal static class StructDirectoryEx {
         return strRet;
     }
 
-    public static void DoScanDirStruct(out List<string> plstScan, GroupOperation penmExtOperation = GroupOperation.IncludingOnly) {
+    public void DoScanDirStruct(out List<string> plstScan, GroupOperation penmExtOperation = GroupOperation.IncludingOnly) {
         //Force a Directory Scan
         plstScan = [];
 
         //FileScanEnum.ReportDirectoryOnly:
         //int lngSuccess = 0;    // 0 : success, -1 : RESERVED for end progressBar, -2, and less : Error
-        int lngMaximum = StructDirectoryEx.ScanDirStruct(out int lngDir, out int lngFiles, penmExtOperation);
+        int lngMaximum = this.ScanDirStruct(out int lngDir, out int lngFiles, penmExtOperation);
         if (lngMaximum >= 0) {
             if (lngMaximum > 0) {
                 Cancel = false;
@@ -273,7 +291,7 @@ internal static class StructDirectoryEx {
 
             //All Operation completed
             // -1 : RESERVED for end progressBar end of progress
-            RaiseMyEvent_DirectoryProgress(-1, 100);
+            RaiseEvent_DirectoryProgress(-1, 100);
         } else {
             // User cancelled or there were an error
             if (lngMaximum == -1) {
@@ -281,11 +299,11 @@ internal static class StructDirectoryEx {
                 //we could fix this by using a new event for Error instead of [RaiseMyEvent_DirectoryProgress]
                 throw new Exception("Oups! Error -1");
             }
-            RaiseMyEvent_DirectoryProgress(lngMaximum, 0);
+            RaiseEvent_DirectoryProgress(lngMaximum, 0);
         }
     }
 
-    public static string GetEntryName(string pstrEntry, string pstrSpecific = "") {
+    public string GetEntryName(string pstrEntry, string pstrSpecific = "") {
         string strRet = "";
 
         // 1. Protection contre les chaînes trop courtes
@@ -314,7 +332,7 @@ internal static class StructDirectoryEx {
     #region Section for ScanDirStruct
     // use DoScanDirStruct() for your program
     //Scan the directory structure only, retourne number of directory and optionally file
-    private static int ScanDirStruct(out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
+    private int ScanDirStruct(out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
         //reset data
         plngDir = 0;
         plngFiles = 0;
@@ -332,10 +350,10 @@ internal static class StructDirectoryEx {
 
                 if (ScanFilename) {
                     lngSuccess = plngFiles;
-                    RaiseMyEvent_ScanCompleted(plngFiles, plngDir);
+                    RaiseEvent_ScanCompleted(plngFiles, plngDir);
                 } else {
                     lngSuccess = plngDir;
-                    RaiseMyEvent_ScanCompleted(plngDir, plngFiles);
+                    RaiseEvent_ScanCompleted(plngDir, plngFiles);
                 }
             }
         } else {
@@ -349,8 +367,8 @@ internal static class StructDirectoryEx {
     //This is to allow a progressbar when doing a full (Dir + file) scan.
     //This is ScanDirStruct, understand it is FORCED to be recursive, if no recursive is needed, progression status isn't eitheir
 
-    //private static bool ScanDirStructEx(string pstrRootPath, out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
-    private static int ScanDirStructEx(string pstrRootPath, out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
+    //private bool ScanDirStructEx(string pstrRootPath, out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
+    private int ScanDirStructEx(string pstrRootPath, out int plngDir, out int plngFiles, GroupOperation penmExtOperation) {
         int lngSuccess = 0;    // 0 : success, -1 : RESERVED for end progressBar, -2, and less : Error
 
         plngDir = 0;
@@ -422,7 +440,7 @@ internal static class StructDirectoryEx {
     #endregion Section for ScanDirStruct
 
     #region Section for ScanDirectory
-    private static bool ScanDirectoryEx(int plngMaximum, out int plngDir, out int plngFiles, ref int plngTotalDir, ref int plngTotalFile, ref List<string> plstOutputList, GroupOperation penmExtOperation, string pstrRootPath, bool pblnBaseIsNotRoot) {
+    private bool ScanDirectoryEx(int plngMaximum, out int plngDir, out int plngFiles, ref int plngTotalDir, ref int plngTotalFile, ref List<string> plstOutputList, GroupOperation penmExtOperation, string pstrRootPath, bool pblnBaseIsNotRoot) {
         //Earch time a file is HIT, it should EventIt to raise progression % based on a total of plngMaximum
         bool blnSuccess = true;
 
@@ -473,7 +491,7 @@ internal static class StructDirectoryEx {
 
                                             if (ScanFilename) {
                                                 int lngPercent = (int)((plngTotalFile * 100.0) / plngMaximum);
-                                                RaiseMyEvent_DirectoryProgress(plngTotalFile, lngPercent);
+                                                RaiseEvent_DirectoryProgress(plngTotalFile, lngPercent);
                                             }
                                         }
                                         blnSuccess = ScanDirectoryEx(plngMaximum, out int lngDir, out int lngFiles, ref plngTotalDir, ref plngTotalFile, ref lstSubScanOutput, penmExtOperation, strTmpPath, true);
@@ -547,7 +565,7 @@ internal static class StructDirectoryEx {
                         lngLocalFile = 0;
 
                         int lngPercent = (int)((plngTotalFile * 100.0) / plngMaximum);
-                        RaiseMyEvent_DirectoryProgress(plngTotalFile, lngPercent);
+                        RaiseEvent_DirectoryProgress(plngTotalFile, lngPercent);
                     }
                 } else {
                     if (lngLocalDir != 0) {
@@ -555,7 +573,7 @@ internal static class StructDirectoryEx {
                         lngLocalDir = 0;
 
                         int lngPercent = (int)((plngTotalDir * 100.0) / plngMaximum);
-                        RaiseMyEvent_DirectoryProgress(plngTotalDir, lngPercent);
+                        RaiseEvent_DirectoryProgress(plngTotalDir, lngPercent);
                     }
                 }
             }
@@ -566,17 +584,17 @@ internal static class StructDirectoryEx {
         return blnSuccess;
     }
 
-    private static bool CheckExtentionF(string pstrData, GroupOperation penmExtOperation, out string pstrExtracted, bool pblnDoExtract) {
+    private bool CheckExtentionF(string pstrData, GroupOperation penmExtOperation, out string pstrExtracted, bool pblnDoExtract) {
         bool blnRet = CheckExtention(pstrData, penmExtOperation, ExtentionF, "[F]", out pstrExtracted, pblnDoExtract);
         return blnRet;
     }
 
-    private static bool CheckExtentionD(string pstrData, GroupOperation penmExtOperation, out string pstrExtracted, bool pblnDoExtract) {
+    private bool CheckExtentionD(string pstrData, GroupOperation penmExtOperation, out string pstrExtracted, bool pblnDoExtract) {
         bool blnRet = CheckExtention(pstrData, penmExtOperation, ExtentionD, "[D]", out pstrExtracted, pblnDoExtract);
         return blnRet;
     }
 
-    private static bool CheckExtention(string pstrData, GroupOperation penmExtOperation, List<string> plstExtention, string pstrType, out string pstrExtracted, bool pblnDoExtract) {
+    private bool CheckExtention(string pstrData, GroupOperation penmExtOperation, List<string> plstExtention, string pstrType, out string pstrExtracted, bool pblnDoExtract) {
         bool blnRet = true; //Assume included
         pstrExtracted = "";
 
@@ -619,66 +637,33 @@ internal static class StructDirectoryEx {
     }
     #endregion Section for ScanDirectory
 
+    public void SetParent(Form pobjForm) {
+        if (UserForm == null) {
+            UserForm = pobjForm;
+        }
+    }
+
+    private Form? UserForm {
+        get;
+        set;
+    }
+
     #region EVENT section
     //https://www.tutorialsteacher.com/csharp/csharp-event
     // Using example:
     //public Form1() {
     //    InitializeComponent();
-    //    StructDirectoryEx.DirectoryScan_Completed += this.StructDirectoryEx_DirectoryScan_Completed;
+    //    StructDirectoryEx.OnDirectoryEvent += this.OnDirectoryEvent;
     //    StructDirectoryEx.SetParent(this);
     //}
 
-    //private void StructDirectoryEx_DirectoryScan_Completed(object? sender, StructDirectoryEx.MyEventArgs e) {
+    //private void OnDirectoryEvent(object? sender, StructDirectoryEx.MyEventArgs e) {
     //    //e.ArgEventTime
     //    ShowPercent(e.ArgCount);
     //}
 
-    public static event EventHandler<MyEventArgs>? DirectoryScan_Completed; // event
-
-    public static void SetParent(Form pobjForm) {
-        if (UserForm == null) {
-            UserForm = pobjForm;
-        }
-    }
-    
-    private static Form? UserForm {
-        get;
-        set;
-    }
-
-    public static void RaiseMyEvent_ScanCompleted(int plngTotalValue1, int plngTotalValue2) {
-        //calling the event
-        MyEventArgs eventArgs = new MyEventArgs {
-            ArgEventNo = 1,
-            ArgValue1 = plngTotalValue1,
-            ArgValue2 = plngTotalValue2
-        };
-        OnMyEvent(eventArgs);
-    }
-
-    //Return the sequentialId of the Directory it just finished scanning
-    public static void RaiseMyEvent_DirectoryProgress(int plngValue, int plngPercent) {
-        //calling the event
-        MyEventArgs eventArgs = new MyEventArgs {
-            ArgEventNo = 2,
-            ArgValue1 = plngValue,
-            ArgValue2 = plngPercent
-        };
-        OnMyEvent(eventArgs);
-    }
-
-    private static void OnMyEvent(MyEventArgs pEventArgs) {
-        //if ProcessCompleted is not null then call delegate
-        if (DirectoryScan_Completed != null) {
-            DirectoryScan_Completed.Invoke(null, pEventArgs);
-        } else {
-            //no events registered
-            //debug.WriteLine("MyEvent is not registered in main program");
-        }
-    }
-
     //class for data passed to the event
-    public class MyEventArgs : EventArgs {
+    public class DirectoryEventArgs : EventArgs {
         public DateTime ArgEventTime {
             get; set;
         } = DateTime.Now;
@@ -699,9 +684,43 @@ internal static class StructDirectoryEx {
             get; set;
         } = 0;
 
-        public string ArgValue3 {
+        public string ArgData {
             get; set;
         } = "";
+    }
+
+    public event EventHandler<DirectoryEventArgs>? OnDirectoryEvent; // event
+
+    private void RaiseEvent(DirectoryEventArgs pEventArgs) {
+        //if ProcessCompleted is not null then call delegate
+        if (OnDirectoryEvent != null) {
+            OnDirectoryEvent.Invoke(this, pEventArgs);
+            //Application.DoEvents();
+        } else {
+            //no events registered
+            //debug.WriteLine("MyEvent is not registered in main program");
+        }
+    }
+
+    private void RaiseEvent_ScanCompleted(int plngTotalValue1, int plngTotalValue2) {
+        //calling the event
+        DirectoryEventArgs eventArgs = new DirectoryEventArgs {
+            ArgEventNo = 1,
+            ArgValue1 = plngTotalValue1,
+            ArgValue2 = plngTotalValue2
+        };
+        RaiseEvent(eventArgs);
+    }
+
+    //Return the sequentialId of the Directory it just finished scanning
+    private void RaiseEvent_DirectoryProgress(int plngValue, int plngPercent) {
+        //calling the event
+        DirectoryEventArgs eventArgs = new DirectoryEventArgs {
+            ArgEventNo = 2,
+            ArgValue1 = plngValue,
+            ArgValue2 = plngPercent
+        };
+        RaiseEvent(eventArgs);
     }
     #endregion EVENT section
 }
