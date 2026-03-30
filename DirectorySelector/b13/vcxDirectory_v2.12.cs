@@ -25,21 +25,22 @@
 // v2.03 - 2025-08-18:  IncludeBasePath default to false;
 //                      Reverse order of pblnIncludeDirectorty and pblnIncludeFile;
 //                      Fix a bug where directory were added even if pblnIncludeDirectorty was false;
-// v2.04 - 2025-09-28   Add Empty scan for structure and progression Event; Improve efficience (speed);
-// v2.05 - 2025-09-28   Add accepted file extention;
-// v2.06 - 2026-02-10   Mainly cosmetic, fixed a public to private function;
-// v2.07 - 2026-02-11   Fix a progressBar logic;
-// v2.08 - 2026-03-14   Add GetPhysicalDrives();
+// v2.04 - 2025-09-28:  Add Empty scan for structure and progression Event; Improve efficience (speed);
+// v2.05 - 2025-09-28:  Add accepted file extention;
+// v2.06 - 2026-02-10:  Mainly cosmetic, fixed a public to private function;
+// v2.07 - 2026-02-11:  Fix a progressBar logic;
+// v2.08 - 2026-03-14:  Add GetPhysicalDrives();
 //                      Add IsFolderValid();
 //                      Add HasSubDirectories();
-// v2.09 - 2026-03-16   Mod Licence heading;
+// v2.09 - 2026-03-16:  Mod Licence heading;
 //                      oIId changed;
-// v2.10 - 2026-03-26   Transfering old function from v1.03;
+// v2.10 - 2026-03-26:  Transfering old function from v1.03;
 //                      Removing static;
 //                      Adding IsValidPath;
 //                      Adding Progress Event;
 //                      now using b13 namespace;
-// v2.11 - 2026-03-27   removing unused parent Form object;
+// v2.11 - 2026-03-27:  removing unused parent Form object;
+// v2.12 - 2026-03-29:  replacing IsNullOrEmpty by IsNullOrWhiteSpace;
 
 #endregion History
 
@@ -179,7 +180,7 @@ internal class StructDirectoryEx {
         }
         set {
             m_strBasePath = value;
-            if (!string.IsNullOrEmpty(m_strBasePath) && m_strBasePath.EndsWith(System.IO.Path.DirectorySeparatorChar)) {
+            if (!string.IsNullOrWhiteSpace(m_strBasePath) && m_strBasePath.EndsWith(System.IO.Path.DirectorySeparatorChar)) {
                 m_strBasePath = m_strBasePath.Substring(0, m_strBasePath.Length - 1);
             }
         }
@@ -245,7 +246,7 @@ internal class StructDirectoryEx {
     public bool IsFolderValid(string pstrPath) {
         bool blnRet = false;
 
-        if (!string.IsNullOrEmpty(pstrPath)) {
+        if (!string.IsNullOrWhiteSpace(pstrPath)) {
             blnRet = System.IO.Directory.Exists(pstrPath);
         }
 

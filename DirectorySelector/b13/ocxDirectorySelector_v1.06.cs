@@ -25,6 +25,7 @@
 //                      MultiSelect is now part of constructor and made private;
 // v1.04 - 2026-03-27:  Adding ABSOLUTE_MIN_SIZE & MinimumSize as property;
 // v1.05 - 2026-03-27:  Fixing .Name vs .Text property; .Name is now unused;
+// v1.06 - 2026-03-29:  replacing IsNullOrEmpty by IsNullOrWhiteSpace;
 
 #endregion History
 
@@ -347,7 +348,7 @@ public class DirTreeViewOcx : UserControl {
                 // Vérification de l'état Checked
                 if (objCurrent.Checked) {
                     // Dans votre structure, le DirectoryPath est stocké dans .Text
-                    if (!string.IsNullOrEmpty(objCurrent.Text)) {
+                    if (!string.IsNullOrWhiteSpace(objCurrent.Text)) {
                         lstRet.Add(objCurrent.Text);
                     }
                 } else {
@@ -443,7 +444,7 @@ public class DirTreeViewOcx : UserControl {
             //    //we need truncate
             //    //ReadOnlySpan<char> spnTmp = strRet.AsSpan().Slice(2, strRet.Length - 5);
 
-            //    //if (!string.IsNullOrEmpty(strRet)) {
+            //    //if (!string.IsNullOrWhiteSpace(strRet)) {
             //    //    ReadOnlySpan<char> spnTmp = strRet.AsSpan();
 
             //    //    // Création des deux segments sans allocation
@@ -461,7 +462,7 @@ public class DirTreeViewOcx : UserControl {
 
     private static string SplitStringFromMiddle(string pstrText, int plngNewSize) {
         string strRet = pstrText;
-        if (!string.IsNullOrEmpty(pstrText)) {
+        if (!string.IsNullOrWhiteSpace(pstrText)) {
             if (pstrText.Length > plngNewSize) {
                 // Initialisation JIT du calcul des segments
                 // On calcule combien de caractères on garde au total
@@ -522,7 +523,7 @@ public class DirTreeViewOcx : UserControl {
         // Initialisation JIT de la variable de retour avec une valeur par défaut
         Size szRet = Size.Empty;
 
-        if (!string.IsNullOrEmpty(pstrText) && pobjFont != null) {
+        if (!string.IsNullOrWhiteSpace(pstrText) && pobjFont != null) {
             // Mesure GDI (plus précise pour le rendu WinForms standard)
             szRet = TextRenderer.MeasureText(pstrText, pobjFont);
         }
@@ -672,7 +673,7 @@ public class DirTreeViewOcx : UserControl {
 
     #region Private OnEvent
     private void OnInternalDrawNode(DrawTreeNodeEventArgs e) {
-        if (e != null && e.Node != null && !string.IsNullOrEmpty(e.Node.Text)) {
+        if (e != null && e.Node != null && !string.IsNullOrWhiteSpace(e.Node.Text)) {
             TreeNode objNode = e.Node;
             if (e.Bounds.Width > 0 && e.Bounds.Height > 0) {
                 //const int lngPaddingX = 3;
@@ -778,7 +779,7 @@ public class DirTreeViewOcx : UserControl {
         TreeViewHitTestInfo objInfo = this._tree.HitTest(e.Location);
         TreeNode? objNode = objInfo.Node;
 
-        if (objNode != null && !string.IsNullOrEmpty(objNode.Text)) {
+        if (objNode != null && !string.IsNullOrWhiteSpace(objNode.Text)) {
             if (this._tree.Focused == false) {
                 this._tree.Focus();
             }
@@ -1007,7 +1008,7 @@ public class DirTreeViewOcx : UserControl {
     private TreeNode? AddNode(CustomTreeNode pData, TreeNode? pobjParentNode = null) {
         TreeNode? objRet = null;
 
-        //if (pData != null && pData.Node != null && !string.IsNullOrEmpty(pData.KeyPath)) {
+        //if (pData != null && pData.Node != null && !string.IsNullOrWhiteSpace(pData.KeyPath)) {
         if (pData != null) {
             //bool blnValid = this._directoryEx.IsFolderValid(pData.KeyPath);
             bool blnValid = this._directoryEx.IsFolderValid(pData.Text);
@@ -1070,7 +1071,7 @@ public class DirTreeViewOcx : UserControl {
     private CustomTreeNode? GetNodeDataByKey(string pstrKeyId) {
         CustomTreeNode? objRet = null;
 
-        if (!string.IsNullOrEmpty(pstrKeyId)) {
+        if (!string.IsNullOrWhiteSpace(pstrKeyId)) {
             this._NodeData.TryGetValue(pstrKeyId, out objRet);
         }
 
@@ -1085,7 +1086,7 @@ public class CustomTreeNode {
     private string _shortText;
 
     public CustomTreeNode(string pstrKey) {
-        if (String.IsNullOrEmpty(pstrKey)) {
+        if (String.IsNullOrWhiteSpace(pstrKey)) {
             throw new ArgumentNullException(nameof(pstrKey));
         }
 
