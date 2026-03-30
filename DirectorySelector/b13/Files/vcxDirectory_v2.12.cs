@@ -161,7 +161,7 @@ internal class StructDirectoryEx {
 
     #region Constructor
     //There isn't one yet
-    //public void SetParent(Form pobjForm) {
+    //void SetParent(Form pobjForm) {
     //    if (UserForm == null) {
     //        UserForm = pobjForm;
     //    }
@@ -174,7 +174,7 @@ internal class StructDirectoryEx {
     #endregion Constructor
 
     #region Property
-    public string BasePath {
+    internal string BasePath {
         get {
             return m_strBasePath;
         }
@@ -186,29 +186,29 @@ internal class StructDirectoryEx {
         }
     }
 
-    public bool ScanFilename { get; set; } = true;
+    internal bool ScanFilename { get; set; } = true;
 
-    public bool Recursive { get; set; } = true;
+    internal bool Recursive { get; set; } = true;
 
-    public bool Cancel { get; set; } = false;
+    internal bool Cancel { get; set; } = false;
 
-    public bool IncludeFullPath { get; set; } = false;
+    internal bool IncludeFullPath { get; set; } = false;
 
-    public bool IncludeDirectory { get; set; } = false;
+    internal bool IncludeDirectory { get; set; } = false;
 
     //List of accepted/excluded file extention to look for when scanning
-    public List<string> ExtentionF { get; set; } = [];
+    internal List<string> ExtentionF { get; set; } = [];
 
     //List of accepted/excluded directory extention to look for when scanning
-    public List<string> ExtentionD { get; set; } = [];
+    internal List<string> ExtentionD { get; set; } = [];
 
     //Excluded [D]DirName and [F]Filename from scan
-    public List<string> ExcludedScan { get; set; } = [];
+    internal List<string> ExcludedScan { get; set; } = [];
     #endregion Property
 
-    #region public Functions
+    #region Functions
     //Validate if the directory can be accessed
-    public static Boolean IsValidPath(String pstrPath) {
+    internal static Boolean IsValidPath(String pstrPath) {
         Boolean blnReturnValue = false;
 
         try {
@@ -220,7 +220,7 @@ internal class StructDirectoryEx {
         return blnReturnValue;
     }
 
-    public List<string> GetPhysicalDrives() {
+    internal List<string> GetPhysicalDrives() {
         List<string> lstRet = [];
 
         try {
@@ -243,7 +243,7 @@ internal class StructDirectoryEx {
         return lstRet;
     }
 
-    public bool IsFolderValid(string pstrPath) {
+    internal bool IsFolderValid(string pstrPath) {
         bool blnRet = false;
 
         if (!string.IsNullOrWhiteSpace(pstrPath)) {
@@ -253,7 +253,7 @@ internal class StructDirectoryEx {
         return blnRet;
     }
 
-    public bool HasSubDirectories(string pstrPath) {
+    internal bool HasSubDirectories(string pstrPath) {
         bool blnRet = false;
 
         try {
@@ -274,7 +274,7 @@ internal class StructDirectoryEx {
         return blnRet;
     }
 
-    public string[] GetVisibleDirectories(string pstrPath) {
+    internal string[] GetVisibleDirectories(string pstrPath) {
         string[] strRet = [];
 
         try {
@@ -296,7 +296,7 @@ internal class StructDirectoryEx {
         return strRet;
     }
 
-    public string GetEntryName(string pstrEntry, string pstrSpecific = "") {
+    internal string GetEntryName(string pstrEntry, string pstrSpecific = "") {
         string strRet = "";
 
         // 1. Protection contre les chaînes trop courtes
@@ -322,7 +322,7 @@ internal class StructDirectoryEx {
         return strRet;
     }
 
-    public void DoScanDirStruct(out List<string> plstScan, GroupOperation penmExtOperation = GroupOperation.IncludingOnly) {
+    internal void DoScanDirStruct(out List<string> plstScan, GroupOperation penmExtOperation = GroupOperation.IncludingOnly) {
         //Force a Directory Scan
         plstScan = [];
 
@@ -351,7 +351,7 @@ internal class StructDirectoryEx {
             RaiseEvent_DirectoryProgress(lngMaximum, 0);
         }
     }
-    #endregion public Functions
+    #endregion Functions
 
     #region private Section for ScanDirStruct
     // use DoScanDirStruct() for your program
@@ -664,7 +664,7 @@ internal class StructDirectoryEx {
     #region EVENT section
     //https://www.tutorialsteacher.com/csharp/csharp-event
     // Using example:
-    //public Form1() {
+    //void Form1() {
     //    InitializeComponent();
     //    StructDirectoryEx.OnDirectoryEvent += this.OnDirectoryEvent;
     //    StructDirectoryEx.SetParent(this);
@@ -676,8 +676,8 @@ internal class StructDirectoryEx {
     //}
 
     //class for data passed to the event
-    public class DirectoryEventArgs : EventArgs {
-        public DateTime ArgEventTime {
+    internal class DirectoryEventArgs : EventArgs {
+        internal DateTime ArgEventTime {
             get; set;
         } = DateTime.Now;
 
@@ -685,19 +685,19 @@ internal class StructDirectoryEx {
         //              1 => Return the Number of Directory from baseScan
         //              2 => Return the sequentialId of the Directory it just finished completed
         //              not exist yet 3 => Return the sequentialId of the File it just finished completed
-        public int ArgEventNo {
+        internal int ArgEventNo {
             get; set;
         } = 0;
 
-        public int ArgValue1 {
+        internal int ArgValue1 {
             get; set;
         } = 0;
 
-        public int ArgValue2 {
+        internal int ArgValue2 {
             get; set;
         } = 0;
 
-        public string ArgData {
+        internal string ArgData {
             get; set;
         } = "";
     }
