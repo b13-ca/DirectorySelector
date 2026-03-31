@@ -10,7 +10,7 @@
   <PropertyGroup>
     <Authors>Patrice CHARBONNEAU</Authors>
     <Company>b13</Company>
-	<Copyright>Copyright © b13 2026</Copyright>
+    <Copyright>Copyright © b13 2026</Copyright>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -18,14 +18,14 @@
     <Title>b13 DirectorySelector WinForms components for directory navigation</Title>
     <VerMajor>4</VerMajor>
     <VerMinor>1</VerMinor>
-
+    
     <UtcYear>$([System.DateTime]::UtcNow.Year)</UtcYear>
-	<UtcMonth>$([System.DateTime]::UtcNow.Month)</UtcMonth>
+    <UtcMonth>$([System.DateTime]::UtcNow.Month)</UtcMonth>
     <UtcDay>$([System.DateTime]::UtcNow.Day)</UtcDay>
-	<VerRevision>$([MSBuild]::Add(
+    <VerRevision>$([MSBuild]::Add(
       $([MSBuild]::Add(
-        $([MSBuild]::Multiply($([MSBuild]::Subtract($(UtcYear), 2026)), 372)),
-        $([MSBuild]::Multiply($([MSBuild]::Subtract($(UtcMonth), 1)), 31))
+      $([MSBuild]::Multiply($([MSBuild]::Subtract($(UtcYear), 2026)), 372)),
+      $([MSBuild]::Multiply($([MSBuild]::Subtract($(UtcMonth), 1)), 31))
       )),
       $(UtcDay)
     ))</VerRevision>
@@ -41,9 +41,9 @@
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageId>b13.DirectorySelector</PackageId>
     <PackageProjectUrl>https://github.com/b13-ca/DirectorySelector/</PackageProjectUrl>
-    <PackageTags>b13 PrototypeOmega dotnet csharp WinForms Components Dialogs</PackageTags>
-	
-	<PackageIconUrl></PackageIconUrl>
+    <PackageTags>b13 prototypeomega dotnet .net windows csharp winforms components dialogs</PackageTags>
+    
+    <PackageIconUrl></PackageIconUrl>
     <PackageIcon>images/b13.png</PackageIcon>
   </PropertyGroup>
   
