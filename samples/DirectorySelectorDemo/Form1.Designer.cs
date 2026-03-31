@@ -43,6 +43,7 @@ partial class Form1 {
         this.ClientSize = new Size(230, 93);
         this.Controls.Add(this.cmdOpenDialog);
         this.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        this.MaximizeBox = false;
         this.Name = "Form1";
         this.StartPosition = FormStartPosition.CenterScreen;
         this.Text = "Demo Dialog";
